@@ -5,18 +5,22 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 import os
+from dotenv import load_dotenv
 
 
 def get_credentials_from_env():
     """Get's username and password from .env fie"""
-    username = os.environ["USERNAME"]
-    password = os.environ["password"]
+    
+    load_dotenv()
+    
+    username = os.environ["MATHNASIUM_USERNAME"]
+    password = os.environ["MATHNASIUM_PASSWORD"]
     
     credential_list = [username, password]
     
     return credential_list
 
-def enter_credentials_to_website(driver, credential_list: list):
+def enter_credentials_to_website(credential_list: list):
     """Fills out username and password form"""
     
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
