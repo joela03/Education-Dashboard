@@ -69,20 +69,24 @@ def enter_credentials_to_website(credential_list: list):
 #         return NameError("Invalid account found.")
     
 
-def download_reports_tab(driver):
+def download_reports(driver):
     """Directs to reports tab from index"""
     
     driver.get("https://radius.mathnasium.com/StudentAttendanceMonthlyReport")
+    end_date = extract_date(driver)
+    print(end_date)
+    print(type(end_date))
     
     return driver
 
 def extract_date(driver):
     """Extracts date"""
     time.sleep(3)
-
+    
     date_input = driver.find_element(By.ID, "ReportEnd")
     date_value = date_input.get_attribute("value")
-    print(type(date_value))
+    
+    return date_value
     
     
         
