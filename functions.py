@@ -44,4 +44,28 @@ def check_successful_login(driver):
     else:
         return ValueError("Incorrect Sumbmission")
     
+def find_account_by_search(account_name: str, driver):
+    """Searches and directs to parent account on Radius"""
+    
+    search_bar = driver.find_element(By.ID, "ContactSearch")
+    search_bar.send_keys(account_name)
+    search_button = driver.find_element(By.ID, "globalbtnsearch")
+    search_button.submit()
+    href = driver.find_element_by_css_selector("linker").get_attribute('href')
+    driver.get(f"https://radius.mathnasium.com{href}")
+    
+    return driver
+
+def verify_valid_account_found(driver, account_name):
+    """Verifies that the right account was found"""
+    
+    h2_element = driver.find_element(By.XPATH, "//h2[text()='Jen Waugh']")
+    h2_text = h2_element.text
+    
+    if h2_text.strip() == account_name.strip():
+        return driver
+    else:
+        return NameError("Invalid account found.")
+    
+    
     
