@@ -80,11 +80,12 @@ def download_reports(driver):
     return driver
 
 def extract_date(driver):
-    """Extracts date"""
+    """Extracts date and converts it to datetime"""
     time.sleep(3)
     
     date_input = driver.find_element(By.ID, "ReportEnd")
     date_value = date_input.get_attribute("value")
+    dt_date_value = datetime.strptime(date_value, "%d/%m/%Y")
     
     return date_value
     
