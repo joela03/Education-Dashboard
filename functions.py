@@ -79,8 +79,8 @@ def download_reports(driver):
     end_date = extract_date(driver)
 
     # Subtracts 4 weeks na dconverts start date to a string
-    dt_start_date = end_date - timedelta(days=28)
-    str_start_date = dt_start_date.strftime("%d/%m/%Y")
+    str_start_date = subtracted_date(end_date, 28)
+    print(type(str_start_date))
 
     # Insert report start date into date bar
     report_start = driver.find_element(By.ID, "ReportStart")
@@ -104,6 +104,21 @@ def extract_date(driver):
     dt_date_value = datetime.strptime(date_value, "%d/%m/%Y")
     
     return dt_date_value
+
+def subtracted_date(date, days: int):
+    """Subtracts a given number of days from a date and returns date as a string"""
+
+    # Converts date to datetime if not string
+    if not isinstance(date, datetime):
+        date = datetime.strptime(date, "%d/%m/%Y")
+
+    dt_subtracted_date = date - timedelta(days=days)
+    str_subtracted_date = dt_subtracted_date.strftime("%d/%m/%Y")
+
+    return str_subtracted_date
+
+    
+
     
     
         
