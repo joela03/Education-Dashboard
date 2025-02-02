@@ -82,8 +82,7 @@ def download_reports(driver):
     print(type(str_start_date))
 
     # Insert report start date into date bar
-    report_start = driver.find_element(By.ID, "ReportStart")
-    report_start.send_keys(str_start_date)
+    sends_keys(driver, "ReportStart", str_start_date)
 
     # Clicks search button
     search_button =  driver.find_element(By.ID, "btnsearch")
