@@ -28,10 +28,9 @@ def enter_credentials_to_website(credential_list: list):
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     driver.get("https://radius.mathnasium.com/Account/Login")
     
-    username_box = driver.find_element(By.ID, "UserName")
-    username_box.send_keys(credential_list[0])
-    password_box = driver.find_element(By.ID, "Password")
-    password_box.send_keys(credential_list[1])
+    sends_keys(driver, "UserName", credential_list[0])
+    sends_keys(driver, "Password", credential_list[1])
+
     submit_button =  driver.find_element(By.ID, "login")
     submit_button.submit()
     
@@ -78,7 +77,7 @@ def download_reports(driver):
     # Extracts current date
     end_date = extract_date(driver)
 
-    # Subtracts 4 weeks na dconverts start date to a string
+    # Subtracts 4 weeks from current date
     str_start_date = subtracted_date(end_date, 28)
     print(type(str_start_date))
 
@@ -116,6 +115,11 @@ def subtracted_date(date, days: int):
     str_subtracted_date = dt_subtracted_date.strftime("%d/%m/%Y")
 
     return str_subtracted_date
+
+def sends_keys(driver, element_id: str, keys: str):
+    """Finds element and sends given keys to """
+    element = driver.find_element(By.ID, element_id)
+    element.send_keys(keys)
 
     
 
