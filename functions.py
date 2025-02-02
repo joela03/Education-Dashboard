@@ -4,7 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import time
 from dotenv import load_dotenv
@@ -70,12 +70,26 @@ def enter_credentials_to_website(credential_list: list):
     
 
 def download_reports(driver):
-    """Directs to reports tab from index"""
+    """Download's report for last 4 weeks """
     
+    # Directs to Student Monthly report page
     driver.get("https://radius.mathnasium.com/StudentAttendanceMonthlyReport")
+
+    # Extracts current date
     end_date = extract_date(driver)
-    print(end_date)
-    print(type(end_date))
+
+    # Subtracts 4 weeks na dconverts start date to a string
+    dt_start_date = end_date - timedelta(days=28)
+    str_start_date = dt_start_date.strftime("%d/%m/%Y")
+
+    # Insert report start date into date bar
+    report_start = driver.find_element(By.ID, "ReportStart")
+    report_start.send_keys(str_start_date)
+
+    # Clicks search button
+    search_button =  driver.find_element(By.ID, "btnsearch")
+    search_button.click()
+    time.sleep(15)
     
     return driver
 
@@ -85,9 +99,11 @@ def extract_date(driver):
     
     date_input = driver.find_element(By.ID, "ReportEnd")
     date_value = date_input.get_attribute("value")
+
+    # Converts string into datetime
     dt_date_value = datetime.strptime(date_value, "%d/%m/%Y")
     
-    return date_value
+    return dt_date_value
     
     
         
