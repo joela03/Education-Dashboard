@@ -31,8 +31,7 @@ def enter_credentials_to_website(credential_list: list):
     sends_keys(driver, "UserName", credential_list[0])
     sends_keys(driver, "Password", credential_list[1])
 
-    submit_button =  driver.find_element(By.ID, "login")
-    submit_button.submit()
+    submit(driver, "login")
     
     try:
         bell = driver.find_element(By.ID, "bell")
@@ -85,8 +84,7 @@ def download_reports(driver):
     sends_keys(driver, "ReportStart", str_start_date)
 
     # Clicks search button
-    search_button =  driver.find_element(By.ID, "btnsearch")
-    search_button.click()
+    click(driver, "btnsearch")
     time.sleep(15)
     
     return driver
@@ -119,6 +117,18 @@ def sends_keys(driver, element_id: str, keys: str):
     """Finds element and sends given keys to """
     element = driver.find_element(By.ID, element_id)
     element.send_keys(keys)
+
+def submit(driver, element_id:str):
+    """Submit's submission"""
+    element =  driver.find_element(By.ID, element_id)
+    element.submit()
+
+def click(driver, element_id):
+    """"Click's JS element"""
+    element =  driver.find_element(By.ID, element_id)
+    element.click()
+
+
 
     
 
