@@ -15,10 +15,7 @@ def get_credentials_from_env():
     
     load_dotenv()
     
-    username = os.environ["MATHNASIUM_USERNAME"]
-    password = os.environ["MATHNASIUM_PASSWORD"]
-    
-    credential_list = [username, password]
+    credential_list = [os.environ["MATHNASIUM_USERNAME"], os.environ["MATHNASIUM_PASSWORD"]]
     
     return credential_list
 
@@ -71,7 +68,7 @@ def download_reports(driver):
     """Download's report for last 4 weeks """
     
     # Directs to Student Monthly report page
-    driver.get("https://radius.mathnasium.com/StudentAttendanceMonthlyReport")
+    driver.get("https://radius.mathnasium.com/StudentReport")
 
     # Extracts current date
     end_date = extract_date(driver)
@@ -93,7 +90,7 @@ def extract_date(driver):
     """Extracts date and converts it to datetime"""
     time.sleep(3)
     
-    date_input = driver.find_element(By.ID, "ReportEnd")
+    date_input = driver.find_element(By.ID, "StudentReportEnd")
     date_value = date_input.get_attribute("value")
 
     # Converts string into datetime
@@ -127,11 +124,11 @@ def click(driver, element_id):
     """"Click's JS element"""
     element =  driver.find_element(By.ID, element_id)
     element.click()
-
-
-
     
-
+def current_date() -> str:
+    "Converts current date to a string in the dd/mm/yyyy format"
     
+    date = datetime.now()
+    str_date = date.strftime("%d/%m/%Y")
     
-        
+    return str_date

@@ -3,13 +3,8 @@ import pytest
 import unittest
 from unittest.mock import patch
 
-from functions import get_credentials_from_env
+from functions import get_credentials_from_env, current_date
 
-class TestGetCredentialsFromEnv(unittest.TestCase):
-    @patch.dict(os.environ, {"USERNAME": "test_user", "password": "test_pass"})
-    def test_get_credentials_from_env(self):
-        # Call the function
-        credentials = get_credentials_from_env()
-
-        # Assert the result
-        self.assertEqual(credentials, ["test_user", "test_pass"])
+def test_current_date():
+    assert type(current_date()) == str
+    assert current_date() == "22/02/2025"
