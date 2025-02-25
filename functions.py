@@ -2,6 +2,8 @@
 
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime, timedelta
@@ -71,14 +73,25 @@ def download_reports(driver):
     driver.get("https://radius.mathnasium.com/StudentReport")
 
     # Extracts current date
-    end_date = extract_date(driver)
+    current_date = datetime.now()
+    current_date_str = dt_to_string(current_date)
 
     # Subtracts 4 weeks from current date
-    str_start_date = subtracted_date(end_date, 28)
-    print(type(str_start_date))
+    str_start_date = subtracted_date(current_date_str, 28)
 
     # Insert report start date into date bar
-    sends_keys(driver, "ReportStart", str_start_date)
+    sends_keys(driver, "StudentReportEnd", str_start_date)
+    sends_keys(driver, "StudentReportStart", str_start_date)
+    
+    
+        
+    # Adjust dropdown - Enrolment type
+    # element = driver.find_element(By.CLASS_NAME, "ec46b16e-8d54-48a4-b241-56684e115143")
+    # driver.execute_script("arguments[0].innerText = 'Enrolment';", element)
+    # change_dropdown_value("//span[@id='ec46b16e-8d54-48a4-b241-56684e115143']", "Enrolment", driver)
+    
+    #Adjust dropdown - Items per page
+    # change_dropdown_value("//span[@id='1791f030-8f07-4cda-a576-de816204467d']", "Enrolment", driver)
 
     # Clicks search button
     click(driver, "btnsearch")
@@ -86,17 +99,17 @@ def download_reports(driver):
     
     return driver
 
-def extract_date(driver):
-    """Extracts date and converts it to datetime"""
-    time.sleep(3)
+# def extract_date(driver):
+#     """Extracts date and converts it to datetime"""
+#     time.sleep(3)
     
-    date_input = driver.find_element(By.ID, "StudentReportEnd")
-    date_value = date_input.get_attribute("value")
+#     date_input = driver.find_element(By.ID, "StudentReportEnd")
+#     date_value = date_input.get_attribute("value")
 
-    # Converts string into datetime
-    dt_date_value = datetime.strptime(date_value, "%d/%m/%Y")
+#     # Converts string into datetime
+#     dt_date_value = datetime.strptime(date_value, "%d/%m/%Y")
     
-    return dt_date_value
+#     return dt_date_value
 
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
@@ -125,10 +138,15 @@ def click(driver, element_id):
     element =  driver.find_element(By.ID, element_id)
     element.click()
     
-def current_date() -> str:
+def dt_to_string(date) -> str:
     "Converts current date to a string in the dd/mm/yyyy format"
     
-    date = datetime.now()
     str_date = date.strftime("%d/%m/%Y")
     
     return str_date
+
+def change_dropdown_value(path: str, value: str, driver):
+    "Takes a given id and changes value of the dropdown to value variable"
+    
+    dropdown_element  = driver.find_element(By.XPATH, path)
+    driver.execute_script(f"arguments[0].innerText = {value};", dropdown_element)
