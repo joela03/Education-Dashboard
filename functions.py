@@ -48,7 +48,7 @@ def download_reports(driver):
     driver.get("https://radius.mathnasium.com/StudentReport")
     
     # Select 3rd option of the dropdown Enrolment
-    interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 3)
+    interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 3, False)
 
     # Extracts current date
     current_date = datetime.now()
@@ -61,12 +61,8 @@ def download_reports(driver):
     input_date(driver, current_date_str, "StudentReportEnd")
     input_date(driver, str_start_date, "StudentReportStart")
     
-    try:
-        pages_dropdown = driver.find_element(By.ID, "093f9ec9-14ca-4beb-bb8b-e53ff0eb5f95")
-    except ValueError as e:
-        return e     
-    
-    # Selects to have 250 elements on the page
+    # Selects to have 1000 elements on the page
+    interact_with_k_dropdown(driver, "//*[@id='gridStudentReport']/div[1]/span[1]/span", 3, True)
     
     # Clicks search button
     click(driver, "btnsearch")
@@ -115,8 +111,13 @@ def change_dropdown_value(path: str, value: str, driver):
     dropdown_element  = driver.find_element(By.XPATH, path)
     driver.execute_script(f"arguments[0].innerText = {value};", dropdown_element)
 
-def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
+def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int, xpath: bool):
     "Takes id of a dropdown and the value of the dropdown you want to select and selects it"
+
+    # If it is an xpath retreive the id of the element first
+    if xpath:
+        dropdown_element = driver.find_element(By.XPATH, dropdown_id)
+        dropdown_id = dropdown_element.get_attribute("id")
 
     js_script = f"""
     var dropdown = $("#{dropdown_id}").data("kendoDropDownList");
