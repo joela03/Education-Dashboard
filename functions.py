@@ -1,9 +1,9 @@
 """Functions that are used to interact with Mathnasium website"""
 
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime, timedelta
@@ -40,76 +40,40 @@ def enter_credentials_to_website(credential_list: list):
         driver.quit()
         raise ValueError("Incorrect Submission")
     
-    
-# def find_account_by_search(account_name: str, driver):
-#     """Searches and directs to parent account on Radius"""
-    
-#     driver.get("https://radius.mathnasium.com/CustomerAccount")
-    
-#     search_bar = driver.find_element(By.ID, "AccountNameSearch")
-#     search_bar.send_keys(account_name)
-#     search_button = driver.find_element(By.ID, "btnsearch")
-#     search_button.submit()
-#     driver.findElement(By.linktext).get_attribute('href').click()
-    
-#     return driver
-
-# def verify_valid_account_found(driver, account_name):
-#     """Verifies that the right account was found"""
-    
-#     h2_element = driver.find_element(By.XPATH, "//h2[text()='Jen Waugh']")
-#     h2_text = h2_element.text
-    
-#     if h2_text.strip() == account_name.strip():
-#         return driver
-#     else:
-#         return NameError("Invalid account found.")
-    
 
 def download_reports(driver):
     """Download's report for last 4 weeks """
     
     # Directs to Student Monthly report page
     driver.get("https://radius.mathnasium.com/StudentReport")
+    
+    # Select 3rd option of the dropdown Enrolment
+    interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 3)
 
     # Extracts current date
     current_date = datetime.now()
     current_date_str = dt_to_string(current_date)
 
-    # Subtracts 4 weeks from current date
+    # # Subtracts 4 weeks from current date
     str_start_date = subtracted_date(current_date_str, 28)
 
-    # Insert report start date into date bar
-    sends_keys(driver, "StudentReportEnd", str_start_date)
-    sends_keys(driver, "StudentReportStart", str_start_date)
+    # # Insert report start date into date bar
+    input_date(driver, current_date_str, "StudentReportEnd")
+    input_date(driver, str_start_date, "StudentReportStart")
     
+    try:
+        pages_dropdown = driver.find_element(By.ID, "093f9ec9-14ca-4beb-bb8b-e53ff0eb5f95")
+    except ValueError as e:
+        return e     
     
-        
-    # Adjust dropdown - Enrolment type
-    # element = driver.find_element(By.CLASS_NAME, "ec46b16e-8d54-48a4-b241-56684e115143")
-    # driver.execute_script("arguments[0].innerText = 'Enrolment';", element)
-    # change_dropdown_value("//span[@id='ec46b16e-8d54-48a4-b241-56684e115143']", "Enrolment", driver)
+    # Selects to have 250 elements on the page
     
-    #Adjust dropdown - Items per page
-    # change_dropdown_value("//span[@id='1791f030-8f07-4cda-a576-de816204467d']", "Enrolment", driver)
-
     # Clicks search button
     click(driver, "btnsearch")
     time.sleep(15)
     
     return driver
 
-# def extract_date(driver):
-#     """Extracts date and converts it to datetime"""
-#     time.sleep(3)
-    
-#     date_input = driver.find_element(By.ID, "StudentReportEnd")
-#     date_value = date_input.get_attribute("value")
-
-#     # Converts string into datetime
-#     dt_date_value = datetime.strptime(date_value, "%d/%m/%Y")
-    
-#     return dt_date_value
 
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
@@ -150,3 +114,31 @@ def change_dropdown_value(path: str, value: str, driver):
     
     dropdown_element  = driver.find_element(By.XPATH, path)
     driver.execute_script(f"arguments[0].innerText = {value};", dropdown_element)
+
+def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
+    "Takes id of a dropdown and the value of the dropdown you want to select and selects it"
+
+    js_script = f"""
+    var dropdown = $("#{dropdown_id}").data("kendoDropDownList");
+    dropdown.value('{dropdown_value}');
+    dropdown.trigger("change");
+    """
+
+    driver.execute_script(js_script)
+    time.sleep(1)  # Give time for the UI to update
+
+    # Verify selection
+    selected_value = driver.execute_script(f"return $('#{dropdown_id}').data('kendoDropDownList').value();")
+    print("Selected value:", selected_value)
+    
+def input_date(driver, date: str, element_id: str):
+    "Splits date by / and then joins array with an arrow key"
+    
+    #Splits date into an array
+    split_reversed_date = date.split("/")
+    
+    # Sends date with Left Arrow key after every input
+    element = driver.find_element(By.ID, element_id)
+    
+    element.send_keys(split_reversed_date[2], Keys.ARROW_LEFT, split_reversed_date[1], Keys.ARROW_LEFT , split_reversed_date[0])
+    
