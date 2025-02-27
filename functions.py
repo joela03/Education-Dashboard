@@ -69,7 +69,11 @@ def download_reports(driver):
     select = Select(dropdown)
     select.select_by_index(3)
 
-    time.sleep(10)
+    time.sleep(5)
+
+    scrape_table(driver, "gridStudentReport")
+
+    time.sleep(5)
     
     return driver
 
@@ -142,11 +146,11 @@ def input_date(driver, date: str, element_id: str):
     
     element.send_keys(split_reversed_date[2], Keys.ARROW_LEFT, split_reversed_date[1], Keys.ARROW_LEFT , split_reversed_date[0])
 
-def scrape_table(driver, table_name: str):
+def scrape_table(driver, table_id: str):
     "Scrapes content from the page and adds it to a pandas df"
 
     # Finds relevant table
-    student_report_table = driver.find_element(By.CLASS_NAME, table_name)
+    student_report_table = driver.find_element(By.ID, table_id)
 
     # Finds header row
     headers = [header.text for header in student_report_table.find_elements(By.TAG_NAME, 'th')]
