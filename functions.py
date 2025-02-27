@@ -1,6 +1,7 @@
 """Functions that are used to interact with Mathnasium website"""
 import os
 import time
+import pandas as pd
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -140,3 +141,30 @@ def input_date(driver, date: str, element_id: str):
     element = driver.find_element(By.ID, element_id)
     
     element.send_keys(split_reversed_date[2], Keys.ARROW_LEFT, split_reversed_date[1], Keys.ARROW_LEFT , split_reversed_date[0])
+
+def scrape_table(driver, table_name: str):
+    "Scrapes content from the page and adds it to a pandas df"
+
+    # Finds relevant table
+    student_report_table = driver.find_element(By.CLASS_NAME, table_name)
+
+    # Finds header row
+    headers = [header.text for header in student_report_table.find_elements(By.TAG_NAME, 'th')]
+
+    # Iterate through rows and extract data
+    rows = student_report_table.find_elements(By.TAG_NAME, 'tr')
+
+    data = []
+    for row in rows:
+        cells = row.find_elements(By.TAG_NAME, 'td')
+        
+        if cells:  
+            row_data = [cell.text for cell in cells]
+            data.append(row_data)
+
+    driver.quit()
+
+    # Convert the data to a Pandas DataFrame
+    df = pd.DataFrame(data, columns=headers)
+
+    print(df)
