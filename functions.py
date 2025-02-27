@@ -1,14 +1,15 @@
 """Functions that are used to interact with Mathnasium website"""
+import os
+import time
 
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime, timedelta
-import os
-import time
 from dotenv import load_dotenv
 
 
@@ -46,27 +47,28 @@ def download_reports(driver):
     
     # Directs to Student Monthly report page
     driver.get("https://radius.mathnasium.com/StudentReport")
-    
-    # Select 3rd option of the dropdown Enrolment
-    interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 3, False)
+
+    # Select Enrolment option for the Enrolment dropdown
+    interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 3)
 
     # Extracts current date
     current_date = datetime.now()
     current_date_str = dt_to_string(current_date)
 
-    # # Subtracts 4 weeks from current date
+    # Subtracts 4 weeks from current date
     str_start_date = subtracted_date(current_date_str, 28)
 
-    # # Insert report start date into date bar
+    # Insert report start date and end date into date bar
     input_date(driver, current_date_str, "StudentReportEnd")
     input_date(driver, str_start_date, "StudentReportStart")
     
     # Selects to have 1000 elements on the page
-    interact_with_k_dropdown(driver, "//*[@id='gridStudentReport']/div[1]/span[1]/span", 3, True)
-    
-    # Clicks search button
-    click(driver, "btnsearch")
-    time.sleep(15)
+    dropdown = driver.find_element(By.XPATH, '//*[@id="gridStudentReport"]/div[1]/span[1]/span/select')
+    driver.execute_script("arguments[0].style.display = 'block';", dropdown)
+    select = Select(dropdown)
+    select.select_by_index(3)
+
+    time.sleep(10)
     
     return driver
 
@@ -111,14 +113,10 @@ def change_dropdown_value(path: str, value: str, driver):
     dropdown_element  = driver.find_element(By.XPATH, path)
     driver.execute_script(f"arguments[0].innerText = {value};", dropdown_element)
 
-def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int, xpath: bool):
+def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
     "Takes id of a dropdown and the value of the dropdown you want to select and selects it"
 
-    # If it is an xpath retreive the id of the element first
-    if xpath:
-        dropdown_element = driver.find_element(By.XPATH, dropdown_id)
-        dropdown_id = dropdown_element.get_attribute("id")
-
+    # Interacts with elements using javascript
     js_script = f"""
     var dropdown = $("#{dropdown_id}").data("kendoDropDownList");
     dropdown.value('{dropdown_value}');
@@ -142,4 +140,3 @@ def input_date(driver, date: str, element_id: str):
     element = driver.find_element(By.ID, element_id)
     
     element.send_keys(split_reversed_date[2], Keys.ARROW_LEFT, split_reversed_date[1], Keys.ARROW_LEFT , split_reversed_date[0])
-    
