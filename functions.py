@@ -17,8 +17,10 @@ from dotenv import load_dotenv
 def get_credentials_from_env():
     """Get's username and password from .env fie"""
     
+    # Loads credentials from secure env file
     load_dotenv()
     
+    # Adds credentials to an array
     credential_list = [os.environ["MATHNASIUM_USERNAME"], os.environ["MATHNASIUM_PASSWORD"]]
     
     return credential_list
@@ -26,28 +28,23 @@ def get_credentials_from_env():
 def enter_credentials_to_website(credential_list: list):
     """Fills out username and password form"""
     
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-    driver.get("https://radius.mathnasium.com/Account/Login")
+    # Directs to Student Monthly report page
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))#
+
+    # Directs to Student Monthly report page
+    driver.get("https://radius.mathnasium.com/StudentReport")
     
+    # Sends username and password to input 
     sends_keys(driver, "UserName", credential_list[0])
     sends_keys(driver, "Password", credential_list[1])
 
+    # Submits credentials
     submit(driver, "login")
-    
-    try:
-        bell = driver.find_element(By.ID, "bell")
-        if bell:
-            return driver
-    except:
-        driver.quit()
-        raise ValueError("Incorrect Submission")
-    
+
+    return driver
 
 def download_reports(driver):
     """Download's report for last 4 weeks """
-    
-    # Directs to Student Monthly report page
-    driver.get("https://radius.mathnasium.com/StudentReport")
 
     # Select Enrolment option for the Enrolment dropdown
     interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 3)
@@ -63,7 +60,7 @@ def download_reports(driver):
     input_date(driver, current_date_str, "StudentReportEnd")
     input_date(driver, str_start_date, "StudentReportStart")
     
-    # Selects to have 1000 elements on the page
+    # Selects items per page to be 1000
     dropdown = driver.find_element(By.XPATH, '//*[@id="gridStudentReport"]/div[1]/span[1]/span/select')
     driver.execute_script("arguments[0].style.display = 'block';", dropdown)
     select = Select(dropdown)
@@ -73,8 +70,6 @@ def download_reports(driver):
 
     scrape_table(driver, "gridStudentReport")
 
-    time.sleep(5)
-    
     return driver
 
 
@@ -85,7 +80,8 @@ def subtracted_date(date, days: int):
     if not isinstance(date, datetime):
         date = datetime.strptime(date, "%d/%m/%Y")
 
-    dt_subtracted_date = date - timedelta(days=days)
+    # Subtracts given days from todays date and converts date object back to a string
+    dt_subtracted_date = date - timedelta(days)
     str_subtracted_date = dt_subtracted_date.strftime("%d/%m/%Y")
 
     return str_subtracted_date
@@ -111,12 +107,6 @@ def dt_to_string(date) -> str:
     str_date = date.strftime("%d/%m/%Y")
     
     return str_date
-
-def change_dropdown_value(path: str, value: str, driver):
-    "Takes a given id and changes value of the dropdown to value variable"
-    
-    dropdown_element  = driver.find_element(By.XPATH, path)
-    driver.execute_script(f"arguments[0].innerText = {value};", dropdown_element)
 
 def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
     "Takes id of a dropdown and the value of the dropdown you want to select and selects it"
@@ -170,5 +160,8 @@ def scrape_table(driver, table_id: str):
 
     # Convert the data to a Pandas DataFrame
     df = pd.DataFrame(data, columns=headers)
+    print(df.head())
+    return df
 
-    print(df)
+
+    
