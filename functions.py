@@ -163,5 +163,12 @@ def scrape_table(driver, table_id: str):
     print(df.head())
     return df
 
-
+def filter_by_last_assessment(df, assessment_type: str, date_period: int, asc: bool):
+    "Filters the dataframe by last assessment in a given period of time"
     
+    assessment_types = ["Progress Check", "Assessment"]
+    
+    if assessment_type not in assessment_types:
+        return ValueError, "Invalid assessment type"
+    
+    df.sort_values(by=[f"Last {assessment_types}"], ascending=asc)
