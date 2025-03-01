@@ -179,4 +179,12 @@ def filter_by_last_assessment(df, assessment_type: str, date_period: int, asc: b
     if assessment_type not in assessment_types:
         return ValueError, "Invalid assessment type"
     
-    df.sort_values(by=[f"Last {assessment_types}"], ascending=asc)
+    # Sort df based on values
+    sorted_df = df.sort_values(by=[f"Last {assessment_type}"], ascending=asc)
+    
+    
+    # Filters df to have assessments in a given period of time only
+    filtered_df = sorted_df.loc(sorted_df[f"Last {assessment_type}"] > subtracted_date(datetime.now(), date_period))
+    print(filtered_df)
+    
+    return filtered_df.loc(["Student First Name"], ["Student Last Name"], ["Year"], ["Attendance"], ["Last Attendance"], [f"Last {assessment_type}"])
