@@ -160,6 +160,14 @@ def scrape_table(driver, table_id: str):
 
     # Convert the data to a Pandas DataFrame
     df = pd.DataFrame(data, columns=headers)
+    
+    # Converts all date columns with string values into datetime objects for comparison
+    date_columns = ["Last Progress Check", "Last Assessment", "Last Attendance", "Last LP Update", "Last PR Sent"]
+    
+    for i in date_columns:
+        df[i] = df[i].apply(lambda x: datetime.strptime(x, "%d/%m/%Y"))
+
+    # Returns metadata of the DataFrame
     print(df.head())
     return df
 
