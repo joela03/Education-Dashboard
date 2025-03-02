@@ -68,8 +68,6 @@ def download_reports(driver):
 
     time.sleep(5)
 
-    scrape_table(driver, "gridStudentReport")
-
     return driver
 
 
@@ -165,8 +163,17 @@ def scrape_table(driver, table_id: str):
     date_columns = ["Last\nProgress Check", "Last\nAssessment", "Last\nAttendance", "Last\nLP Update", "Last\nPR Sent"]
 
     # Returns metadata of the DataFrame
-    print(df.head())
+    print(df.iloc[0])
     return df
+
+def convert_col_to_dt(df, columns: list):
+    "Takes in list of columns and converts values to datetime objects"
+
+    for i in columns:
+        df[i] = df[i].apply(lambda x: datetime.strptime(x, "%d/%m/%Y"))
+
+    return df
+
 
 def filter_by_last_assessment(df, assessment_type: str, date_period: int, asc: bool):
     "Filters the dataframe by last assessment in a given period of time"
@@ -177,11 +184,11 @@ def filter_by_last_assessment(df, assessment_type: str, date_period: int, asc: b
         return ValueError, "Invalid assessment type"
     
     # Sort df based on values
-    sorted_df = df.sort_values(by=[f"Last {assessment_type}"], ascending=asc)
+    sorted_df = df.sort_values(by=[f"Last\n{assessment_type}"], ascending=asc)
     
     
     # Filters df to have assessments in a given period of time only
-    filtered_df = sorted_df.loc(sorted_df[f"Last {assessment_type}"] > subtracted_date(datetime.now(), date_period))
+    filtered_df = sorted_df.loc(sorted_df[f"Last\n{assessment_type}"] > subtracted_date(datetime.now(), date_period))
     print(filtered_df)
     
     return filtered_df.loc(["Student First Name"], ["Student Last Name"], ["Year"], ["Attendance"], ["Last Attendance"], [f"Last {assessment_type}"])
