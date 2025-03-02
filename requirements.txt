@@ -2,3 +2,4 @@ Selenium
 dotenv
 webdriver-manager
 pandas
+pytest
