@@ -37,3 +37,11 @@ def test_empty_dataframe():
     df = convert_col_to_dt(df, ['date1'])
     
     assert df.empty
+
+def test_empty_string_handling():
+    df =  pd.DataFrame({'date1': ['', '15/02/2023', '30/06/2022']})
+    df = convert_col_to_dt(df, ['date1'])
+    
+    # Check if empty string is converted to NaT
+    assert pd.isna(df.loc[0, 'date1'])
+    assert df.loc[1, 'date1'] == datetime(2023, 2, 15)
