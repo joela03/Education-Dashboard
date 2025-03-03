@@ -121,7 +121,6 @@ def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
 
     # Verify selection
     selected_value = driver.execute_script(f"return $('#{dropdown_id}').data('kendoDropDownList').value();")
-    print("Selected value:", selected_value)
     
 def input_date(driver, date: str, element_id: str):
     "Splits date by / and then joins array with an arrow key"
@@ -170,8 +169,8 @@ def convert_col_to_dt(df, columns: list):
     "Takes in list of columns and converts values to datetime objects"
 
     for i in columns:
-        df[i] = df[i].apply(lambda x: datetime.strptime(x, "%d/%m/%Y"))
-
+        df[i] = df[i].replace("", pd.NaT)
+        df[i] = pd.to_datetime(df[i], format="%d/%m/%Y", errors='coerce')
     return df
 
 
@@ -188,7 +187,7 @@ def filter_by_last_assessment(df, assessment_type: str, date_period: int, asc: b
     
     
     # Filters df to have assessments in a given period of time only
-    filtered_df = sorted_df.loc(sorted_df[f"Last\n{assessment_type}"] > subtracted_date(datetime.now(), date_period))
+    filtered_df = sorted_df.loc[sorted_df[f"Last\n{assessment_type}"] > subtracted_date(datetime.now(), date_period)]
     print(filtered_df)
     
-    return filtered_df.loc(["Student First Name"], ["Student Last Name"], ["Year"], ["Attendance"], ["Last Attendance"], [f"Last {assessment_type}"])
+    return filtered_df.loc[:, ["Student First Name", "Student Last Name", "Year", "Attendance", "Last\nAttendance", f"Last\n{assessment_type}"]]
