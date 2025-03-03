@@ -8,6 +8,6 @@ if __name__ == "__main__":
     driver = enter_credentials_to_website(credential_list)
     driver = download_reports(driver)
     df = scrape_table(driver, "gridStudentReport")
+    filtered_df = convert_col_to_dt(df, ["Last\nProgress Check", "Last\nAssessment", "Last\nAttendance", "Last\nLP Update", "Last\nPR Sent"])
     filtered_df = filter_by_last_assessment(df, "Progress Check", 28, False)
-    filtered_df = convert_col_to_dt(filtered_df, ["Last\nProgress Check", "Last\nAssessment", "Last\nAttendance", "Last\nLP Update", "Last\nPR Sent"])
     
