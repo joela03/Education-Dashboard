@@ -35,13 +35,15 @@ if __name__ == "__main__":
         joined_df = convert_col_to_dt(joined_df, ["Last\nProgress Check", "Last\nAssessment",
                                                   "Last\nAttendance", "Last\nLP Update",
                                                   "Last\nPR Sent"])
-        
+
         # Joins first name and last name of students
-        joined_df['Student First Name'] = joined_df.apply(lambda row: row['Student First Name'] + ' ' + row['Student Last Name'], axis=1)
+        joined_df['Student First Name'] = joined_df.apply(lambda row: row['Student First Name'] +
+                                                        ' ' + row['Student Last Name'], axis=1)
 
         # Rename first column
-        joined_df.rename(columns={"Student First Name": "Student", "Student First Name Link": "Student Link" }, inplace=True)
-        
+        joined_df.rename(columns={"Student First Name": "Student",
+                                "Student First Name Link": "Student Link" }, inplace=True)
+
         # Create id column
         add_mathnasium_id_column(joined_df)
 
@@ -49,15 +51,15 @@ if __name__ == "__main__":
         select_progress_report_batch(driver)
         progress_df = scrape_table(driver, "gridCurrentBatch")
 
-        # Merges the student report and progress report 
+        # Merges the student report and progress report
         merged_df = pd.merge(joined_df,
-                            progress_df[['Student', 'Total LP Skills Mastered', 'Total LP Skills', '% Skills\nMastered']],
+                            progress_df[['Student', 'Total LP Skills Mastered',
+                            'Total LP Skills', '% Skills\nMastered']],
                             on=['Student'],
                             how='inner')
-        
+
         # Removes irrelevant columns
         merged_df = merged_df.drop(['Student Last Name', 'Guardian Emails'], axis=1)
-
 
     finally:
         driver.quit()

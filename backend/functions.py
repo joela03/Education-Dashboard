@@ -127,7 +127,8 @@ def scrape_table(driver, table_id: str):
     student_report_table = driver.find_element(By.ID, table_id)
 
     # Extract headers
-    headers = [header.text.strip() for header in student_report_table.find_elements(By.TAG_NAME, 'th')]
+    headers = [header.text.strip() for header in
+            student_report_table.find_elements(By.TAG_NAME, 'th')]
 
     # Ensure headers are available
     if headers and len(headers) > 0:
@@ -153,10 +154,10 @@ def scrape_table(driver, table_id: str):
             # Append text and link separately
             row_data.append(first_col_text)
             row_data.append(first_col_link)
-            
+
             # Append the remaining columns as text
             row_data.extend([cell.text.strip() for cell in cells[1:]])
-            
+
             data.append(row_data)
 
     # Handle missing headers
@@ -228,4 +229,5 @@ def select_progress_report_batch(driver):
 def add_mathnasium_id_column(df):
     "Extracts id from link column and makes new Mathnasium ID column"
 
-    df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1] if pd.notna(x) else None)
+    df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1]
+                                                   if pd.notna(x) else None)
