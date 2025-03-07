@@ -54,11 +54,12 @@ def select_reports(driver, enrolmentdropdownvalue):
     input_date(driver, str_start_date, "StudentReportStart")
 
     # Selects items per page to be 1000
-    dropdown = driver.find_element(By.XPATH,
-                                   '//*[@id="gridStudentReport"]/div[1]/span[1]/span/select')
-    driver.execute_script("arguments[0].style.display = 'block';", dropdown)
-    select = Select(dropdown)
-    select.select_by_index(3)
+    select_report_count(driver, "gridStudentReport", 3)
+    # dropdown = driver.find_element(By.XPATH,
+    #                                '//*[@id="gridStudentReport"]/div[1]/span[1]/span/select')
+    # driver.execute_script("arguments[0].style.display = 'block';", dropdown)
+    # select = Select(dropdown)
+    # select.select_by_index(3)
 
     time.sleep(5)
 
@@ -182,3 +183,24 @@ def merge_df(df1, df2):
     "Merges df's horizontally"
 
     return pd.concat([df1, df2], ignore_index=True)
+
+def select_report_count(driver, id: str, index: int):
+
+    # Selects items per page to be 1000
+    dropdown = driver.find_element(By.XPATH,
+                                   f'//*[@id="{id}"]/div[1]/span[1]/span/select')
+    driver.execute_script("arguments[0].style.display = 'block';", dropdown)
+    select = Select(dropdown)
+    select.select_by_index(index)
+
+def select_progress_report_batch(driver):
+    "Navigate's to the progress report page"
+
+    # Navigates to current progress report page
+    driver.get("https://radius.mathnasium.com/ProgressReportManager/CurrentBatchDetail")
+    time.sleep(4)
+
+    # Selects the report to display 1000 items
+    select_report_count(driver, "gridCurrentBatch", 3)
+    time.sleep(3)
+
