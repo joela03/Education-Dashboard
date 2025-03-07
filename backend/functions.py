@@ -23,6 +23,16 @@ def get_credentials_from_env():
 
     return credential_list
 
+def sends_keys(driver, element_id: str, keys: str):
+    """Finds element and sends given keys to """
+    element = driver.find_element(By.ID, element_id)
+    element.send_keys(keys)
+
+def submit(driver, element_id:str):
+    """Submit's submission"""
+    element =  driver.find_element(By.ID, element_id)
+    element.submit()
+
 def enter_credentials_to_website(driver, credential_list):
     """Fills out username and password form"""
 
@@ -55,11 +65,6 @@ def select_reports(driver, enrolmentdropdownvalue):
 
     # Selects items per page to be 1000
     select_report_count(driver, "gridStudentReport", 3)
-    # dropdown = driver.find_element(By.XPATH,
-    #                                '//*[@id="gridStudentReport"]/div[1]/span[1]/span/select')
-    # driver.execute_script("arguments[0].style.display = 'block';", dropdown)
-    # select = Select(dropdown)
-    # select.select_by_index(3)
 
     time.sleep(5)
 
@@ -76,16 +81,6 @@ def subtracted_date(date, days: int):
     str_subtracted_date = dt_subtracted_date.strftime("%d/%m/%Y")
 
     return str_subtracted_date
-
-def sends_keys(driver, element_id: str, keys: str):
-    """Finds element and sends given keys to """
-    element = driver.find_element(By.ID, element_id)
-    element.send_keys(keys)
-
-def submit(driver, element_id:str):
-    """Submit's submission"""
-    element =  driver.find_element(By.ID, element_id)
-    element.submit()
 
 def click(driver, element_id):
     """"Click's JS element"""
@@ -128,13 +123,17 @@ def input_date(driver, date: str, element_id: str):
 def scrape_table(driver, table_id: str):
     "Scrapes content from the page and adds it to a pandas df"
 
-    # Finds relevant table
+    # Find the table
     student_report_table = driver.find_element(By.ID, table_id)
 
-    # Finds header row
-    headers = [header.text for header in student_report_table.find_elements(By.TAG_NAME, 'th')]
+    # Extract headers
+    headers = [header.text.strip() for header in student_report_table.find_elements(By.TAG_NAME, 'th')]
 
-    # Iterate through rows and extract data
+    # Ensure headers are available
+    if headers and len(headers) > 0:
+        headers.insert(1, headers[0] + " Link")  # Add a new header for the link column
+
+    # Extract table rows
     rows = student_report_table.find_elements(By.TAG_NAME, 'tr')
 
     data = []
@@ -142,10 +141,29 @@ def scrape_table(driver, table_id: str):
         cells = row.find_elements(By.TAG_NAME, 'td')
 
         if cells:
-            row_data = [cell.text for cell in cells]
+            row_data = []
+            first_col_text = cells[0].text.strip()  # Default text from first column
+            first_col_link = None  # Default to None if no link found
+
+            # Extract the link if present in the first column
+            link = cells[0].find_elements(By.TAG_NAME, 'a')
+            if link:
+                first_col_link = link[0].get_attribute("href")
+
+            # Append text and link separately
+            row_data.append(first_col_text)
+            row_data.append(first_col_link)
+            
+            # Append the remaining columns as text
+            row_data.extend([cell.text.strip() for cell in cells[1:]])
+            
             data.append(row_data)
 
-    # Convert the data to a Pandas DataFrame
+    # Handle missing headers
+    if not headers and data:
+        headers = [f"Column {i+1}" for i in range(len(data[0]))]
+
+    # Convert to DataFrame
     df = pd.DataFrame(data, columns=headers)
 
     return df
@@ -206,3 +224,8 @@ def select_progress_report_batch(driver):
     # Selects the report to display 1000 items
     select_report_count(driver, "gridCurrentBatch", 3)
     time.sleep(3)
+
+def add_mathnasium_id_column(df):
+    "Extracts id from link column and makes new Mathnasium ID column"
+
+    df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1] if pd.notna(x) else None)
