@@ -1,25 +1,26 @@
 """Functions that are used to interact with Mathnasium website"""
 import os
 import time
+from datetime import datetime, timedelta
+
 import pandas as pd
 
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.by import By
-from datetime import datetime, timedelta
+
 from dotenv import load_dotenv
 
 
 def get_credentials_from_env():
     """Get's username and password from .env fie"""
-    
+
     # Loads credentials from secure env file
     load_dotenv()
-    
+
     # Adds credentials to an array
     credential_list = [os.environ["MATHNASIUM_USERNAME"], os.environ["MATHNASIUM_PASSWORD"]]
-    
+
     return credential_list
 
 def enter_credentials_to_website(driver, credential_list):
@@ -51,9 +52,10 @@ def select_reports(driver, enrolmentdropdownvalue):
     # Insert report start date and end date into date bar
     input_date(driver, current_date_str, "StudentReportEnd")
     input_date(driver, str_start_date, "StudentReportStart")
-    
+
     # Selects items per page to be 1000
-    dropdown = driver.find_element(By.XPATH, '//*[@id="gridStudentReport"]/div[1]/span[1]/span/select')
+    dropdown = driver.find_element(By.XPATH,
+                                   '//*[@id="gridStudentReport"]/div[1]/span[1]/span/select')
     driver.execute_script("arguments[0].style.display = 'block';", dropdown)
     select = Select(dropdown)
     select.select_by_index(3)
@@ -88,12 +90,12 @@ def click(driver, element_id):
     """"Click's JS element"""
     element =  driver.find_element(By.ID, element_id)
     element.click()
-    
+
 def dt_to_string(date) -> str:
     "Converts current date to a string in the dd/mm/yyyy format"
-    
+
     str_date = date.strftime("%d/%m/%Y")
-    
+
     return str_date
 
 def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
@@ -107,21 +109,20 @@ def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
     """
 
     driver.execute_script(js_script)
-    time.sleep(1)  # Give time for the UI to update
+    time.sleep(1)
 
-    # Verify selection
-    selected_value = driver.execute_script(f"return $('#{dropdown_id}').data('kendoDropDownList').value();")
-    
 def input_date(driver, date: str, element_id: str):
     "Splits date by / and then joins array with an arrow key"
-    
+
     #Splits date into an array
     split_reversed_date = date.split("/")
-    
+
     # Sends date with Left Arrow key after every input
     element = driver.find_element(By.ID, element_id)
-    
-    element.send_keys(split_reversed_date[2], Keys.ARROW_LEFT, split_reversed_date[1], Keys.ARROW_LEFT , split_reversed_date[0])
+
+    element.send_keys(split_reversed_date[2], Keys.ARROW_LEFT,
+                      split_reversed_date[1], Keys.ARROW_LEFT,
+                      split_reversed_date[0])
 
 def scrape_table(driver, table_id: str):
     "Scrapes content from the page and adds it to a pandas df"
@@ -138,16 +139,13 @@ def scrape_table(driver, table_id: str):
     data = []
     for row in rows:
         cells = row.find_elements(By.TAG_NAME, 'td')
-        
-        if cells:  
+
+        if cells:
             row_data = [cell.text for cell in cells]
             data.append(row_data)
 
     # Convert the data to a Pandas DataFrame
     df = pd.DataFrame(data, columns=headers)
-    
-    # Converts all date columns with string values into datetime objects for comparison
-    date_columns = ["Last\nProgress Check", "Last\nAssessment", "Last\nAttendance", "Last\nLP Update", "Last\nPR Sent"]
 
     return df
 
@@ -162,24 +160,25 @@ def convert_col_to_dt(df, columns: list):
 
 def filter_by_last_assessment(df, assessment_type: str, date_period: int, asc: bool):
     "Filters the dataframe by last assessment in a given period of time"
-    
+
     assessment_types = ["Progress Check", "Assessment"]
-    
+
     if assessment_type not in assessment_types:
         return ValueError, "Invalid assessment type"
-    
+
     # Sort df based on values
     sorted_df = df.sort_values(by=[f"Last\n{assessment_type}"], ascending=asc)
-    
-    
+
+
     # Filters df to have assessments in a given period of time only
-    filtered_df = sorted_df.loc[sorted_df[f"Last\n{assessment_type}"] > subtracted_date(datetime.now(), date_period)]
+    filtered_df = sorted_df.loc[sorted_df[f"Last\n{assessment_type}"] >
+                                subtracted_date(datetime.now(), date_period)]
     print(filtered_df)
-    
-    return filtered_df.loc[:, ["Student First Name", "Student Last Name", "Year", "Attendance", "Last\nAttendance", f"Last\n{assessment_type}"]]
+
+    return filtered_df.loc[:, ["Student First Name", "Student Last Name", "Year",
+                            "Attendance", "Last\nAttendance", f"Last\n{assessment_type}"]]
 
 def merge_df(df1, df2):
     "Merges df's horizontally"
 
     return pd.concat([df1, df2], ignore_index=True)
-
