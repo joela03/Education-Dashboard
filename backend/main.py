@@ -29,10 +29,11 @@ if __name__ == "__main__":
 
         # Combine both dataframes
         joined_df = merge_df(enrolment_df, hold_df)
+
+        # Converting column with date values into date objects
+        joined_df = convert_col_to_dt(joined_df, ["Last\nProgress Check", "Last\nAssessment", "Last\nAttendance", "Last\nLP Update", "Last\nPR Sent"])
         print(joined_df)
 
     finally:
         driver.quit()
-    # filtered_df = convert_col_to_dt(df, ["Last\nProgress Check", "Last\nAssessment", "Last\nAttendance", "Last\nLP Update", "Last\nPR Sent"])
-    # filtered_df = filter_by_last_assessment(df, "Progress Check", 28, False)
     
