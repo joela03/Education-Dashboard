@@ -3,3 +3,4 @@ dotenv
 webdriver-manager
 pandas
 pytest
+psycopg2
