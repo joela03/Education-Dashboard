@@ -184,12 +184,15 @@ def merge_df(df1, df2):
 
     return pd.concat([df1, df2], ignore_index=True)
 
-def select_report_count(driver, id: str, index: int):
+def select_report_count(driver, dropdown_id: str, index: int):
+    "Selects the number of items displayed on your report"
 
-    # Selects items per page to be 1000
+    # Finds dropdown by the xpath
     dropdown = driver.find_element(By.XPATH,
-                                   f'//*[@id="{id}"]/div[1]/span[1]/span/select')
+                                   f'//*[@id="{dropdown_id}"]/div[1]/span[1]/span/select')
     driver.execute_script("arguments[0].style.display = 'block';", dropdown)
+
+    # Classifies select object and selects the given index
     select = Select(dropdown)
     select.select_by_index(index)
 
@@ -203,4 +206,3 @@ def select_progress_report_batch(driver):
     # Selects the report to display 1000 items
     select_report_count(driver, "gridCurrentBatch", 3)
     time.sleep(3)
-
