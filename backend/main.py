@@ -49,13 +49,15 @@ if __name__ == "__main__":
         select_progress_report_batch(driver)
         progress_df = scrape_table(driver, "gridCurrentBatch")
 
-        # Create id column
-        add_mathnasium_id_column(progress_df)
+        # Merges the student report and progress report 
+        merged_df = pd.merge(joined_df,
+                            progress_df[['Student', 'Total LP Skills Mastered', 'Total LP Skills', '% Skills\nMastered']],
+                            on=['Student'],
+                            how='inner')
+        
+        # Removes irrelevant columns
+        merged_df = merged_df.drop(['Student Last Name', 'Guardian Emails'], axis=1)
 
-        # Finds missing students in a table and removes them
-        missing_students_df = progress_df[~progress_df["Student"].isin(joined_df["Student"])]
-        missing_students_list = missing_students_df["Student"].tolist()
-        progress_df_cleaned = progress_df[~progress_df["Student"].isin(missing_students_list)]
 
     finally:
         driver.quit()
