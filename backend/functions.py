@@ -38,8 +38,6 @@ def enter_credentials_to_website(driver, credential_list):
 def select_reports(driver, enrolmentdropdownvalue):
     """Download's report for last 4 weeks """
 
-    time.sleep(5)
-
     # Select Enrolment option for the Enrolment dropdown
     interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", enrolmentdropdownvalue)
 
@@ -151,8 +149,6 @@ def scrape_table(driver, table_id: str):
     # Converts all date columns with string values into datetime objects for comparison
     date_columns = ["Last\nProgress Check", "Last\nAssessment", "Last\nAttendance", "Last\nLP Update", "Last\nPR Sent"]
 
-    # Returns metadata of the DataFrame
-    print(df.iloc[0])
     return df
 
 def convert_col_to_dt(df, columns: list):
@@ -181,3 +177,9 @@ def filter_by_last_assessment(df, assessment_type: str, date_period: int, asc: b
     print(filtered_df)
     
     return filtered_df.loc[:, ["Student First Name", "Student Last Name", "Year", "Attendance", "Last\nAttendance", f"Last\n{assessment_type}"]]
+
+def merge_df(df1, df2):
+    "Merges df's horizontally"
+
+    return pd.concat([df1, df2], ignore_index=True)
+
