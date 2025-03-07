@@ -3,13 +3,10 @@ import os
 import time
 import pandas as pd
 
-from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 
@@ -25,29 +22,26 @@ def get_credentials_from_env():
     
     return credential_list
 
-def enter_credentials_to_website(credential_list: list):
+def enter_credentials_to_website(driver, credential_list):
     """Fills out username and password form"""
-    
-    # Directs to Student Monthly report page
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))#
 
     # Directs to Student Monthly report page
     driver.get("https://radius.mathnasium.com/StudentReport")
-    
-    # Sends username and password to input 
+
+    # Sends username and password to input
     sends_keys(driver, "UserName", credential_list[0])
     sends_keys(driver, "Password", credential_list[1])
 
     # Submits credentials
     submit(driver, "login")
 
-    return driver
-
-def download_reports(driver):
+def select_reports(driver, enrolmentdropdownvalue):
     """Download's report for last 4 weeks """
 
+    time.sleep(5)
+
     # Select Enrolment option for the Enrolment dropdown
-    interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 3)
+    interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", enrolmentdropdownvalue)
 
     # Extracts current date
     current_date = datetime.now()
@@ -67,8 +61,6 @@ def download_reports(driver):
     select.select_by_index(3)
 
     time.sleep(5)
-
-    return driver
 
 
 def subtracted_date(date, days: int):
@@ -152,8 +144,6 @@ def scrape_table(driver, table_id: str):
         if cells:  
             row_data = [cell.text for cell in cells]
             data.append(row_data)
-
-    driver.quit()
 
     # Convert the data to a Pandas DataFrame
     df = pd.DataFrame(data, columns=headers)
