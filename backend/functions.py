@@ -132,7 +132,7 @@ def scrape_table(driver, table_id: str):
 
     # Ensure headers are available
     if headers and len(headers) > 0:
-        headers.insert(1, headers[0] + " Link")  # Add a new header for the link column
+        headers.insert(1, headers[0] + " Link")
 
     # Extract table rows
     rows = student_report_table.find_elements(By.TAG_NAME, 'tr')
@@ -143,8 +143,8 @@ def scrape_table(driver, table_id: str):
 
         if cells:
             row_data = []
-            first_col_text = cells[0].text.strip()  # Default text from first column
-            first_col_link = None  # Default to None if no link found
+            first_col_text = cells[0].text.strip()
+            first_col_link = None
 
             # Extract the link if present in the first column
             link = cells[0].find_elements(By.TAG_NAME, 'a')
@@ -231,3 +231,12 @@ def add_mathnasium_id_column(df):
 
     df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1]
                                                    if pd.notna(x) else None)
+
+def extract_link(cell):
+    """Extracts text and hyperlink from a given cell."""
+    text = cell.text.strip()
+    link = None
+    link_element = cell.find_elements(By.TAG_NAME, 'a')
+    if link_element:
+        link = link_element[0].get_attribute("href")
+    return text, link
