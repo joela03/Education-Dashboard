@@ -124,7 +124,7 @@ def scrape_table(driver, table_id: str, progress_report: bool):
     "Scrapes content from the page and adds it to a pandas df"
 
     time.sleep(3)
-    
+
     # Find the table
     student_report_table = driver.find_element(By.ID, table_id)
 
@@ -181,7 +181,7 @@ def convert_col_to_dt(df, columns: list):
     "Takes in list of columns and converts values to datetime objects"
 
     for i in columns:
-        df[i] = df[i].replace("", pd.NaT)
+        df[i] = df[i].replace("", None)
         df[i] = pd.to_datetime(df[i], format="%d/%m/%Y", errors='coerce')
     return df
 
