@@ -132,7 +132,7 @@ def scrape_table(driver, table_id: str, progress_report: bool):
 
     # Ensure headers are available
     if headers and len(headers) > 0:
-        headers.insert(1, headers[0] + " Link")  # Add a new header for the link column
+        headers.insert(1, headers[0] + " Link")
 
     # Extract table rows
     rows = student_report_table.find_elements(By.TAG_NAME, 'tr')
@@ -143,7 +143,7 @@ def scrape_table(driver, table_id: str, progress_report: bool):
 
         if cells:
             row_data = []
-            first_col_text = cells[0].text.strip()  
+            first_col_text = cells[0].text.strip()
             first_col_link = None
 
             # Extract the link if present in the first column
@@ -237,4 +237,3 @@ def add_mathnasium_id_column(df):
 
     df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1]
                                                    if pd.notna(x) else None)
-    

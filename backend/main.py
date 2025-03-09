@@ -60,7 +60,8 @@ if __name__ == "__main__":
                             how='inner')
 
         # Removes irrelevant columns
-        merged_df = merged_df.drop(['Student Last Name', 'Guardian Emails', 'Virtual Center'], axis=1)
+        merged_df = merged_df.drop(['Student Last Name', 'Guardian Emails'
+                                    ,'Virtual Center'], axis=1)
 
         # Cleans column names
         merged_df.columns = merged_df.columns.str.replace("\n", " ", regex=True)
