@@ -120,8 +120,8 @@ def input_date(driver, date: str, element_id: str):
                       split_reversed_date[1], Keys.ARROW_LEFT,
                       split_reversed_date[0])
 
-def scrape_table(driver, table_id: str, table_type: str):
-    "Scrapes content from the page and adds it to a pandas df and scrapes link from given"
+def scrape_table(driver, table_id: str, progress_report: bool):
+    "Scrapes content from the page and adds it to a pandas df"
 
     # Find the table
     student_report_table = driver.find_element(By.ID, table_id)
@@ -130,10 +130,9 @@ def scrape_table(driver, table_id: str, table_type: str):
     headers = [header.text.strip() for header in
             student_report_table.find_elements(By.TAG_NAME, 'th')]
 
-    # Adds link column to progress report table 
-    if table_type == "Progress Report" and len(headers) > 2:
-        headers.insert(1, headers[0] + " Link")
-        headers.insert(3, headers[2] + " Link")
+    # Ensure headers are available
+    if headers and len(headers) > 0:
+        headers.insert(1, headers[0] + " Link")  # Add a new header for the link column
 
     # Extract table rows
     rows = student_report_table.find_elements(By.TAG_NAME, 'tr')
@@ -144,24 +143,27 @@ def scrape_table(driver, table_id: str, table_type: str):
 
         if cells:
             row_data = []
-            
-            # Extract first column and third column link if progress report
-            if table_type == "Progress Report" and len(cells) > 4:
-                first_col_text, first_col_link = extract_text_and_link(cells[0])
-                row_data.extend([first_col_text, first_col_link])
+            first_col_text = cells[0].text.strip()  
+            first_col_link = None
 
-                row_data.append(cells[1].text.strip())
+            # Extract the link if present in the first column
+            link = cells[0].find_elements(By.TAG_NAME, 'a')
+            if link:
+                first_col_link = link[0].get_attribute("href")
 
-                # Extract the link if present in the first column
-                third_col_text, third_col_link = extract_text_and_link(cells[2])
-                row_data.extend([third_col_text, third_col_link])
+            # Append text and link
+            row_data.append(first_col_text)
+            row_data.append(first_col_link)
 
-                # Append the remaining columns as text
-                row_data.extend([cell.text.strip() for cell in cells[3:]])
+            # If progress_report, extract the second <a> tag
+            if progress_report and len(cells) > 2:
+                links_in_third_col = cells[2].find_elements(By.TAG_NAME, 'a')
+                if len(links_in_third_col) > 1:
+                    row_data[1] = links_in_third_col[1].get_attribute("href")
 
-            else:
-                row_data.extend([cell.text.strip() for cell in cells])
-            
+            # Append the remaining columns as text
+            row_data.extend([cell.text.strip() for cell in cells[1:]])
+
             data.append(row_data)
 
     # Handle missing headers
@@ -235,12 +237,4 @@ def add_mathnasium_id_column(df):
 
     df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1]
                                                    if pd.notna(x) else None)
-
-def extract_text_and_link(cell):
-    """Extracts text and hyperlink from a given cell."""
-    text = cell.text.strip()
-    link = None
-    link_element = cell.find_elements(By.TAG_NAME, 'a')
-    if link_element:
-        link = link_element[0].get_attribute("href")
-    return text, link
+    
