@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
 
-# Database connection
 def get_db_connection():
     """Sets up connection with database"""
 
@@ -14,13 +13,14 @@ def get_db_connection():
     db_user = os.getenv("DB_USER")
     db_name = os.getenv("DB_NAME")
     db_port = os.getenv("DB_PORT")
+    db_password = os.getenv("DB_PASSWORD")
 
     # Check if all environment variables
-    if not all([db_host, db_user, db_name, db_port]):
+    if not all([db_host, db_user, db_name, db_port, db_password]):
         raise ValueError("Missing required environment variables for DB connection.")
     
     # Establish and return the connection
-    return psycopg2.connect(host=db_host, user=db_user, dbname=db_name, port=db_port)
+    return psycopg2.connect(host=db_host, user=db_user, dbname=db_name, port=db_port, password=db_password)
 
 def get_cursor(connection: psycopg2.extensions.connection) -> psycopg2.extensions.cursor:
     """Sets up cursor"""
