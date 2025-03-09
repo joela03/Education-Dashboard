@@ -9,6 +9,7 @@ from functions import (get_credentials_from_env, enter_credentials_to_website,
                        select_reports, scrape_table,convert_col_to_dt,
                        click, interact_with_k_dropdown, merge_df,
                        select_progress_report_batch, add_mathnasium_id_column)
+from imports import (get_db_connection, import_students_to_database)
 
 if __name__ == "__main__":
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -61,14 +62,16 @@ if __name__ == "__main__":
 
         # Removes irrelevant columns
         merged_df = merged_df.drop(['Student Last Name', 'Guardian Emails'
-                                    ,'Virtual Center'], axis=1)
+                                    ,'Virtual Center', ''], axis=1)
 
         # Cleans column names
         merged_df.columns = merged_df.columns.str.replace("\n", " ", regex=True)
 
         # Splits guardian string into seperate list items
         merged_df["Guardians"] = merged_df["Guardians"].str.split("\n")
-        print(merged_df.columns.values)
 
     finally:
         driver.quit()
+
+    conn = get_db_connection()
+    import_students_to_database(conn, merged_df)
