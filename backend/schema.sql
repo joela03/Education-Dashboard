@@ -23,3 +23,12 @@ CREATE TABLE "students"(
     "skills_mastered_percent" DECIMAL(5,2),
     PRIMARY KEY("id")
 );
+
+CREATE TABLE "guardians"(
+    "id" BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
+    "student_id" BIGINT NOT NULL,
+    "guardian_name" VARCHAR(255) NOT NULL,
+    "guardian_phone" VARCHAR(255),
+    PRIMARY KEY("id"),
+    FOREIGN KEY("student_id") REFERENCES "students"("id") ON DELETE CASCADE
+);
