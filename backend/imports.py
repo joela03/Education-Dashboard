@@ -25,3 +25,16 @@ def get_db_connection():
 def get_cursor(connection: psycopg2.extensions.connection) -> psycopg2.extensions.cursor:
     """Sets up cursor"""
     return connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+def get_enrolment_key(conn, enrolment: str) -> int:
+    """Gets genre key"""
+    curs = get_cursor(conn)
+    curs.execute("""SELECT enrolment_id
+                   FROM enrolment_status
+                   WHERE enrolment_status LIKE %s;""",
+                 (enrolment,))
+    data = curs.fetchone()
+    curs.close()
+
+    if data:
+        return data["enrolment_id"]

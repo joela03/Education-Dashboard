@@ -1,13 +1,14 @@
 import unittest
 from unittest import mock
-from imports import get_db_connection 
+from unittest.mock import MagicMock
+from imports import (get_db_connection, get_enrolment_key)
 
 class TestGetDbConnection(unittest.TestCase):
 
     @mock.patch("psycopg2.connect")
     @mock.patch("os.getenv")
     def test_get_db_connection_success(self, mock_getenv, mock_connect):
-        "Validates successful connection"
+        """Validates successful connection"""
         mock_getenv.return_value = "test_value"
 
         mock_connect.return_value = "Mocked Connection Object"
@@ -26,7 +27,7 @@ class TestGetDbConnection(unittest.TestCase):
     @mock.patch("os.getenv")
     @mock.patch("psycopg2.connect")
     def test_get_db_connection_missing_env_vars(self, mock_connect, mock_getenv):
-        'Returns ValueError is returned if variable is not present'
+        """Returns ValueError is returned if variable is not present"""
         required_vars = ["DB_HOST", "DB_USER", "DB_NAME", "DB_PORT"]
         
         for var in required_vars:
@@ -39,3 +40,16 @@ class TestGetDbConnection(unittest.TestCase):
             # Check if ValueError is raised due to the missing environment variable
             with self.assertRaises(ValueError):
                 get_db_connection()
+    
+    @mock.patch("imports.get_cursor")
+    def test_get_enrolment_key_found(self, mock_get_cursor):
+        """Test enrolment is found in the database."""
+        mock_cursor = MagicMock()
+        mock_cursor.fetchone.return_value = {"enrolment_id": 123}
+
+        mock_get_cursor.return_value = mock_cursor
+        mock_conn = MagicMock()
+
+        result = get_enrolment_key(mock_conn, "active")
+
+        self.assertEqual(result, 123)
