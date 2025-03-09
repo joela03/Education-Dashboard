@@ -53,3 +53,16 @@ class TestGetDbConnection(unittest.TestCase):
         result = get_enrolment_key(mock_conn, "active")
 
         self.assertEqual(result, 123)
+    
+    @mock.patch("imports.get_cursor")
+    def test_get_enrolment_key_not_found(self, mock_get_cursor):
+        """Testenrolment key is not found."""
+        mock_cursor = MagicMock()
+        mock_cursor.fetchone.return_value = None
+
+        mock_get_cursor.return_value = mock_cursor
+        mock_conn = MagicMock()
+
+        result = get_enrolment_key(mock_conn, "inactive")
+
+        self.assertIsNone(result)

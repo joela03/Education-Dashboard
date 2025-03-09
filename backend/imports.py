@@ -38,3 +38,5 @@ def get_enrolment_key(conn, enrolment: str) -> int:
 
     if data:
         return data["enrolment_id"]
+
+    return None
