@@ -32,3 +32,11 @@ CREATE TABLE "guardians"(
     PRIMARY KEY("id"),
     FOREIGN KEY("student_id") REFERENCES "students"("id") ON DELETE CASCADE
 );
+
+CREATE TABLE "users"(
+    "id" BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
+    "username" VARCHAR(50) NOT NULL,
+    "password_hash" VARCHAR(255) NOT NULL,
+    "salt" VARCHAR(255) NOT NULL,
+    PRIMARY KEY("id")
+);
