@@ -40,3 +40,9 @@ CREATE TABLE "users"(
     "salt" VARCHAR(255) NOT NULL,
     PRIMARY KEY("id")
 );
+
+CREATE TABLE "enrolment_status"(
+    "enrolment_id" BIGINT NOT NULL,
+    "enrolment_status" VARCHAR(255) NOT NULL,
+    PRIMARY KEY("enrolment_id")
+);
