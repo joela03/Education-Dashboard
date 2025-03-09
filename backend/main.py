@@ -17,15 +17,16 @@ if __name__ == "__main__":
         credential_list = get_credentials_from_env()
         enter_credentials_to_website(driver, credential_list)
 
-        # Scrape enrolment reports
+
+        # # Scrape enrolment reports
         select_reports(driver, 3)
-        enrolment_df = scrape_table(driver, "gridStudentReport", "Student Report")
+        enrolment_df = scrape_table(driver, "gridStudentReport", 0)
 
         # Scrape hold reports
         interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 4)
         click(driver, "btnsearch")
         time.sleep(3)
-        hold_df = scrape_table(driver, "gridStudentReport", "Student Report")
+        hold_df = scrape_table(driver, "gridStudentReport", 0)
 
         # Combine both dataframes
         joined_df = merge_df(enrolment_df, hold_df)
@@ -43,22 +44,29 @@ if __name__ == "__main__":
         joined_df.rename(columns={"Student First Name": "Student",
                                 "Student First Name Link": "Student Link" }, inplace=True)
 
+        # Create id column
+        add_mathnasium_id_column(joined_df)
+
         # Scrapes progress reports
         select_progress_report_batch(driver)
-        progress_df = scrape_table(driver, "gridCurrentBatch", "Progress Report")
-
-        # Create id column
-        add_mathnasium_id_column(progress_df)
+        progress_df = scrape_table(driver, "gridCurrentBatch", 1)
+        progress_df.rename(columns={"Student Link": "Account Link"}, inplace=True)
 
         # Merges the student report and progress report
         merged_df = pd.merge(joined_df,
                             progress_df[['Student', 'Total LP Skills Mastered',
-                            'Total LP Skills', '% Skills\nMastered']],
+                            'Total LP Skills', '% Skills\nMastered', "Account Link"]],
                             on=['Student'],
                             how='inner')
 
         # Removes irrelevant columns
         merged_df = merged_df.drop(['Student Last Name', 'Guardian Emails'], axis=1)
+
+        # Cleans column names
+        merged_df.columns = merged_df.columns.str.replace("\n", " ", regex=True)
+
+        # Splits guardian string into seperate list items
+        merged_df["Guardians"] = merged_df["Guardians"].str.split("\n")
         print(merged_df.columns.values)
 
     finally:
