@@ -123,6 +123,8 @@ def input_date(driver, date: str, element_id: str):
 def scrape_table(driver, table_id: str, progress_report: bool):
     "Scrapes content from the page and adds it to a pandas df"
 
+    time.sleep(3)
+    
     # Find the table
     student_report_table = driver.find_element(By.ID, table_id)
 
