@@ -1,7 +1,7 @@
 import unittest
 from unittest import mock
 from unittest.mock import MagicMock
-from imports import (get_db_connection, get_enrolment_key)
+from imports import (get_db_connection, get_status_key)
 
 class TestGetDbConnection(unittest.TestCase):
 
@@ -41,28 +41,21 @@ class TestGetDbConnection(unittest.TestCase):
             with self.assertRaises(ValueError):
                 get_db_connection()
     
-    @mock.patch("imports.get_cursor")
-    def test_get_enrolment_key_found(self, mock_get_cursor):
-        """Test enrolment is found in the database."""
-        mock_cursor = MagicMock()
-        mock_cursor.fetchone.return_value = {"enrolment_id": 123}
+    def test_get_status_key_enrolment(self):
+        self.assertEqual(get_status_key("enrolment", "enrolled"), 0)
+        self.assertEqual(get_status_key("enrolment", "on hold"), 1)
+        self.assertIsNone(get_status_key("enrolment", "unknown"))
 
-        mock_get_cursor.return_value = mock_cursor
-        mock_conn = MagicMock()
+    def test_get_status_key_delivery(self):
+        self.assertEqual(get_status_key("delivery", "in-centre"), 0)
+        self.assertEqual(get_status_key("delivery", "@home"), 1)
+        self.assertIsNone(get_status_key("delivery", "not existing"))
 
-        result = get_enrolment_key(mock_conn, "active")
+    def test_get_status_key_invalid_type(self):
+        self.assertIsNone(get_status_key("invalid_type", "enrolled"))
+        self.assertIsNone(get_status_key("unknown", "on hold"))
 
-        self.assertEqual(result, 123)
-    
-    @mock.patch("imports.get_cursor")
-    def test_get_enrolment_key_not_found(self, mock_get_cursor):
-        """Testenrolment key is not found."""
-        mock_cursor = MagicMock()
-        mock_cursor.fetchone.return_value = None
-
-        mock_get_cursor.return_value = mock_cursor
-        mock_conn = MagicMock()
-
-        result = get_enrolment_key(mock_conn, "inactive")
-
-        self.assertIsNone(result)
+    def test_get_status_key_case_insensitivity(self):
+        self.assertEqual(get_status_key("ENROLMENT", "ENROLLED"), 0)
+        self.assertEqual(get_status_key("Delivery", "@HOME"), 1)
+        self.assertEqual(get_status_key("DeLiVeRy", "In-Centre"), 0)
