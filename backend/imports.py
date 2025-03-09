@@ -6,7 +6,7 @@ import psycopg2.extras
 
 # Database connection
 def get_db_connection():
-    "Sets up connection with database"
+    """Sets up connection with database"""
 
     # Load environment variables
     load_dotenv()
@@ -26,17 +26,10 @@ def get_cursor(connection: psycopg2.extensions.connection) -> psycopg2.extension
     """Sets up cursor"""
     return connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-def get_enrolment_key(conn, enrolment: str) -> int:
-    """Gets genre key"""
-    curs = get_cursor(conn)
-    curs.execute("""SELECT enrolment_id
-                   FROM enrolment_status
-                   WHERE enrolment_status LIKE %s;""",
-                 (enrolment,))
-    data = curs.fetchone()
-    curs.close()
-
-    if data:
-        return data["enrolment_id"]
-
-    return None
+def get_enrolment_key(enrolment: str) -> int | None:
+    """Returns enrolment key based on the string."""
+    enrolment_mapping = {
+        "In-Centre": 0,
+        "@home": 1
+    }
+    return enrolment_mapping.get(enrolment.lower())
