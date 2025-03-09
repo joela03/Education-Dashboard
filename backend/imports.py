@@ -26,10 +26,18 @@ def get_cursor(connection: psycopg2.extensions.connection) -> psycopg2.extension
     """Sets up cursor"""
     return connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-def get_enrolment_key(enrolment: str) -> int | None:
-    """Returns enrolment key based on the string."""
-    enrolment_mapping = {
-        "In-Centre": 0,
-        "@home": 1
+def get_status_key(status_type: str, status: str) -> int | None:
+    """Returns a key based on the given status type and value."""
+    
+    status_mappings = {
+        "enrolment": {
+            "enrolled": 0,
+            "on hold": 1
+        },
+        "delivery": {
+            "in-centre": 0,
+            "@home": 1
+        }
     }
-    return enrolment_mapping.get(enrolment.lower())
+
+    return status_mappings.get(status_type.lower(), {}).get(status.lower())
