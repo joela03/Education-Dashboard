@@ -46,3 +46,7 @@ CREATE TABLE "enrolment_status"(
     "enrolment_status" VARCHAR(255) NOT NULL,
     PRIMARY KEY("enrolment_id")
 );
+
+ALTER TABLE "students"
+ADD CONSTRAINT "students_enrolment_status_foreign" 
+FOREIGN KEY("enrolment_status") REFERENCES "enrolment_status"("enrolment_id");
