@@ -46,3 +46,13 @@ class TestPercentageToFloat(unittest.TestCase):
     def test_spaces_and_formatting(self):
         self.assertEqual(percentage_to_float(" 50% "), 0.5)
         self.assertEqual(percentage_to_float("\t25%\n"), 0.25)
+
+    def test_invalid_inputs(self):
+        with self.assertRaises(ValueError):
+            percentage_to_float("50")
+        with self.assertRaises(ValueError):
+            percentage_to_float("abc%")
+        with self.assertRaises(ValueError):
+            percentage_to_float("%")
+        with self.assertRaises(ValueError):
+            percentage_to_float("") 
