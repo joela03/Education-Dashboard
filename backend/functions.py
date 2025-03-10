@@ -247,4 +247,7 @@ def safe_date(value):
 
 def percentage_to_float(string):
     """Converts a percentage string (e.g., '75%') to a float (e.g., 0.75)."""
-    return float(string.strip().replace('%', '')) / 100
+    try:
+        return float(string.strip().replace('%', ''))
+    except ValueError:
+        raise ValueError(f"Invalid percentage format: {string}")
