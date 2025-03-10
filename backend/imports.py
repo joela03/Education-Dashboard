@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
+from functions import safe_date
 
 def get_db_connection():
     """Sets up connection with database"""
@@ -83,10 +84,15 @@ def import_students_to_database(conn, df):
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
         """, (
             student_id, delivery_id, row['Attendance'],
-            row['Last Attendance'], row['Last Assessment'], row['Active LPs'],
-            row['Skills Assigned'], row['Skills Mastered'], row['Last LP Update'],
-            row['Last PR Sent'], row['Last Progress Check'], row['Mathnasium ID'],
-            row['Total LP Skills Mastered'], row['Total LP Skills'], row['% Skills Mastered']
+            safe_date(row['Last Attendance']),
+            safe_date(row['Last Assessment']),
+            row['Active LPs'],
+            row['Skills Assigned'], row['Skills Mastered'],
+            safe_date(row['Last LP Update']),
+            safe_date(row['Last PR Sent']),
+            safe_date(row['Last Progress Check']),
+            row['Mathnasium ID'], row['Total LP Skills Mastered'],
+            row['Total LP Skills'], row['% Skills Mastered']
         ))
         conn.commit()
 
