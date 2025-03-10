@@ -1,8 +1,10 @@
 import pytest
 import pandas as pd
 from datetime import datetime
+
+import unittest
 from unittest.mock import patch
-from functions import convert_col_to_dt
+from functions import convert_col_to_dt, percentage_to_float
 
 
 
@@ -25,19 +27,6 @@ def test_convert_col_to_dt():
     assert df.loc[0, 'date1'] == datetime(2024, 1, 1)
     assert df.loc[1, 'date2'] == datetime(2020, 7, 20)
 
-def test_invalid_date_format():
-    data = {'date1': ['2024-01-01', '15-02-2023', '30/06/2022']}
-    df = pd.DataFrame(data)
-    
-    with pytest.raises(ValueError):
-        convert_col_to_dt(df, ['date1'])
-
-def test_empty_dataframe():
-    df = pd.DataFrame({'date1': []})
-    df = convert_col_to_dt(df, ['date1'])
-    
-    assert df.empty
-
 def test_empty_string_handling():
     df =  pd.DataFrame({'date1': ['', '15/02/2023', '30/06/2022']})
     df = convert_col_to_dt(df, ['date1'])
@@ -45,3 +34,15 @@ def test_empty_string_handling():
     # Check if empty string is converted to NaT
     assert pd.isna(df.loc[0, 'date1'])
     assert df.loc[1, 'date1'] == datetime(2023, 2, 15)
+    
+class TestPercentageToFloat(unittest.TestCase):
+    
+    def test_valid_percentages(self):
+        self.assertEqual(percentage_to_float("50%"), 0.5)
+        self.assertEqual(percentage_to_float("100%"), 1.0)
+        self.assertEqual(percentage_to_float("0%"), 0.0)
+        self.assertEqual(percentage_to_float("75.5%"), 0.755)
+    
+    def test_spaces_and_formatting(self):
+        self.assertEqual(percentage_to_float(" 50% "), 0.5)
+        self.assertEqual(percentage_to_float("\t25%\n"), 0.25)

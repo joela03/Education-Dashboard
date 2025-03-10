@@ -97,6 +97,7 @@ def dt_to_string(date) -> str:
 def interact_with_k_dropdown(driver, dropdown_id: str, dropdown_value: int):
     "Takes id of a dropdown and the value of the dropdown you want to select and selects it"
 
+    time.sleep(3)
     # Interacts with elements using javascript
     js_script = f"""
     var dropdown = $("#{dropdown_id}").data("kendoDropDownList");
@@ -243,3 +244,7 @@ def add_mathnasium_id_column(df):
 def safe_date(value):
     """Converts NaT or NaN values to None"""
     return None if isna(value) else value
+
+def percentage_to_float(string):
+    """Converts a percentage string (e.g., '75%') to a float (e.g., 0.75)."""
+    return float(string.strip().replace('%', '')) / 100
