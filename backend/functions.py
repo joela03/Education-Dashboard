@@ -183,6 +183,8 @@ def convert_col_to_dt(df, columns: list):
     for i in columns:
         df[i] = df[i].replace("", None)
         df[i] = pd.to_datetime(df[i], format="%d/%m/%Y", errors='coerce')
+        df[i] = df[i].where(pd.notna(df[i]), None)
+        
     return df
 
 
