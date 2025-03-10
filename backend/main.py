@@ -26,7 +26,8 @@ if __name__ == "__main__":
         # Scrape hold reports
         interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 4)
         click(driver, "btnsearch")
-        time.sleep(3)
+        
+        time.sleep(10)
         hold_df = scrape_table(driver, "gridStudentReport", 0)
 
         # Combine both dataframes
