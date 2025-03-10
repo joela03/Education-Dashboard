@@ -124,7 +124,7 @@ def input_date(driver, date: str, element_id: str):
 def scrape_table(driver, table_id: str, progress_report: bool):
     "Scrapes content from the page and adds it to a pandas df"
 
-    time.sleep(3)
+    time.sleep(5)
 
     # Find the table
     student_report_table = driver.find_element(By.ID, table_id)
@@ -231,7 +231,7 @@ def select_progress_report_batch(driver):
 
     # Navigates to current progress report page
     driver.get("https://radius.mathnasium.com/ProgressReportManager/CurrentBatchDetail")
-    time.sleep(4)
+    time.sleep(15)
 
     # Selects the report to display 1000 items
     select_report_count(driver, "gridCurrentBatch", 3)
