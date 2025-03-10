@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 
 import pandas as pd
-
+from pandas import isna
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
@@ -239,3 +239,7 @@ def add_mathnasium_id_column(df):
 
     df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1]
                                                    if pd.notna(x) else None)
+
+def safe_date(value):
+    """Converts NaT or NaN values to None"""
+    return None if isna(value) else value
