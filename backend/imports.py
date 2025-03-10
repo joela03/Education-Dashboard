@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
-from functions import safe_date
+from functions import safe_date, percentage_to_float
 
 def get_db_connection():
     """Sets up connection with database"""
@@ -92,13 +92,19 @@ def import_students_to_database(conn, df):
             safe_date(row['Last PR Sent']),
             safe_date(row['Last Progress Check']),
             row['Mathnasium ID'], row['Total LP Skills Mastered'],
-            row['Total LP Skills'], row['% Skills Mastered']
+            row['Total LP Skills'], percentage_to_float(row['% Skills Mastered'])
         ))
         conn.commit()
 
         # Insert guardians and student_guardians
-        guardians = row.get('Guardians', '').split(', ')
-        guardian_phones = row.get('Guardian Phone Numbers', '').split(', ')
+        guardians = row.get('Guardians', [])
+        guardian_phones = row.get('Guardian Phone Numbers', [])
+
+        if not isinstance(guardians, list):
+            guardians = [guardians]
+        if not isinstance(guardian_phones, list):
+            guardian_phones = [guardian_phones]
+
         for guardian_name, guardian_phone in zip(guardians, guardian_phones):
             curs.execute("""
                 INSERT INTO guardians (guardian_name, guardian_phone)
