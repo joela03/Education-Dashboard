@@ -54,3 +54,14 @@ class TestPercentageToFloat(unittest.TestCase):
             percentage_to_float("%")
         with self.assertRaises(ValueError):
             percentage_to_float("")
+
+def test_ensure_list():
+    assert ensure_list(['Alice', 'Bob']) == ['Alice', 'Bob'], "Failed: Already a list"
+    assert ensure_list("['Alice', 'Bob']") == ['Alice', 'Bob'], "Failed: Stringified list"
+    assert ensure_list("Alice, Bob, Charlie") == ['Alice', 'Bob', 'Charlie'], "Failed: Comma-separated string"
+    assert ensure_list("Alice") == ['Alice'], "Failed: Single string"
+    assert ensure_list(None) == [], "Failed: None input"
+    assert ensure_list(42) == [], "Failed: Integer input"
+    assert ensure_list({'Alice': 'Bob'}) == [], "Failed: Dictionary input"
+    assert ensure_list("[]") == [], "Failed: Empty stringified list"
+    assert ensure_list("") == [""], "Failed: Empty string should return list with empty string"
