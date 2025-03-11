@@ -18,8 +18,8 @@ CREATE TABLE "student_information" (
     FOREIGN KEY ("enrolment_id") REFERENCES "enrolment_status"("enrolment_id") ON DELETE SET NULL
 );
 
-CREATE TABLE "account" (
-    "id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+CREATE TABLE "accounts" (
+    "account_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "student_id" BIGINT NOT NULL UNIQUE,
     "account_name" VARCHAR(255) NOT NULL,
     "account_link" VARCHAR(500),
@@ -47,7 +47,7 @@ CREATE TABLE "student_education_stats" (
 );
 
 CREATE TABLE "guardians" (
-    "id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "guardian_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "guardian_name" VARCHAR(255) NOT NULL,
     "guardian_phone" VARCHAR(255)
 );
