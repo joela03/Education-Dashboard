@@ -4,7 +4,8 @@ from datetime import datetime
 
 import unittest
 from unittest.mock import patch
-from functions import convert_col_to_dt, percentage_to_float, ensure_list
+from functions import (convert_col_to_dt, percentage_to_float, ensure_list)
+from imports import get_status_key
 
 
 
@@ -65,3 +66,14 @@ def test_ensure_list():
     assert ensure_list({'Alice': 'Bob'}) == [], "Failed: Dictionary input"
     assert ensure_list("[]") == [], "Failed: Empty stringified list"
     assert ensure_list("") == [""], "Failed: Empty string should return list with empty string"
+
+def test_get_status_key():
+    assert get_status_key("enrolment", "enrolment") == 0
+    assert get_status_key("enrolment", "on hold") == 1
+    assert get_status_key("delivery", "in-centre") == 0
+    assert get_status_key("delivery", "@home") == 1
+    
+    assert get_status_key("Enrolment", "Enrolment") == 0
+    assert get_status_key("ENROLMENT", "ON HOLD") == 1
+    assert get_status_key("Delivery", "IN-CENTRE") == 0
+    assert get_status_key("DELIVERY", "@HOME") == 1
