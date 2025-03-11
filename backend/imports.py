@@ -60,7 +60,12 @@ def import_students_to_database(conn, df):
         curs.execute("""
             INSERT INTO student_information (name, mathnasium_id, student_link, enrolment_id, year)
             VALUES (%s, %s, %s, %s)
-            RETURNING id;
+            ON CONFLICT (mathnasium_id) DO UPDATE 
+            SET name = EXCLUDED.name,
+                student_link = EXCLUDED.student_link,
+                enrolment_id = EXCLUDED.enrolment_id,
+                year = EXCLUDED.year
+            RETURNING student_id;
         """, (row['Student'], row.get('Mathnasium ID'), row['Student Link'], enrolment_id, row['Year']))
         student_id = curs.fetchone().get('student_id')
         conn.commit()
@@ -69,7 +74,9 @@ def import_students_to_database(conn, df):
         curs.execute("""
             INSERT INTO account (student_id, account_name, account_link)
             VALUES (%s, %s, %s, %s)
-            ON CONFLICT (student_id) DO NOTHING;
+            ON CONFLICT (student_id) DO UPDATE 
+            SET account_name = EXCLUDED.account_name,
+                account_link = EXCLUDED.account_link;
         """, (student_id, row['Account Name'], row['Account Link']))
         conn.commit()
 
@@ -81,7 +88,22 @@ def import_students_to_database(conn, df):
                 last_progress_check, mathnasium_id, total_lp_skills_mastered, total_lp_skills,
                 skills_mastered_percent
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (student_id) DO UPDATE 
+            SET delivery_id = EXCLUDED.delivery_id,
+                attendance_count = EXCLUDED.attendance_count,
+                last_attendance = EXCLUDED.last_attendance,
+                last_assessment = EXCLUDED.last_assessment,
+                active_lps = EXCLUDED.active_lps,
+                skills_assigned = EXCLUDED.skills_assigned,
+                skills_mastered = EXCLUDED.skills_mastered,
+                last_lp_update = EXCLUDED.last_lp_update,
+                last_pr_sent = EXCLUDED.last_pr_sent,
+                last_progress_check = EXCLUDED.last_progress_check,
+                mathnasium_id = EXCLUDED.mathnasium_id,
+                total_lp_skills_mastered = EXCLUDED.total_lp_skills_mastered,
+                total_lp_skills = EXCLUDED.total_lp_skills,
+                skills_mastered_percent = EXCLUDED.skills_mastered_percent;
         """, (
             student_id, delivery_id, row['Attendance'],
             safe_date(row['Last Attendance']),
@@ -107,6 +129,8 @@ def import_students_to_database(conn, df):
             curs.execute("""
                 INSERT INTO guardians (guardian_name, guardian_phone)
                 VALUES (%s, %s)
+                ON CONFLICT (guardian_name) DO UPDATE 
+                SET guardian_phone = EXCLUDED.guardian_phone
                 RETURNING id;
             """, (guardian_name.strip(), guardian_phone.strip()))
             guardian_id = curs.fetchone()[0]
