@@ -104,9 +104,9 @@ def import_students_to_database(conn, df):
             curs.execute("""
                 INSERT INTO guardians (guardian_name, guardian_phone)
                 VALUES (%s, %s)
-                RETURNING guardian_id;
+                RETURNING id;
             """, (guardian_name.strip(), guardian_phone.strip()))
-            guardian_id = curs.fetchone().get('id')
+            guardian_id = curs.fetchone()[0]
             conn.commit()
 
             # Insert into student_guardians table
