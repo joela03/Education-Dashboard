@@ -27,8 +27,7 @@ CREATE TABLE "account" (
 );
 
 CREATE TABLE "student_education_stats" (
-    "id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    "student_id" BIGINT NOT NULL UNIQUE,
+    "student_id" BIGINT NOT NULL UNIQUE PRIMARY KEY,
     "delivery_id" BIGINT,
     "attendance_count" BIGINT,
     "last_attendance" DATE,
@@ -43,7 +42,7 @@ CREATE TABLE "student_education_stats" (
     "total_lp_skills_mastered" BIGINT,
     "total_lp_skills" BIGINT,
     "skills_mastered_percent" DECIMAL(5,2),
-    FOREIGN KEY ("student_id") REFERENCES "student_information"("id") ON DELETE CASCADE,
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
     FOREIGN KEY ("delivery_id") REFERENCES "delivery"("delivery_id") ON DELETE SET NULL
 );
 
