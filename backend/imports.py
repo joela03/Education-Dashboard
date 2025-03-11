@@ -62,7 +62,7 @@ def import_students_to_database(conn, df):
             VALUES (%s, %s, %s, %s)
             RETURNING id;
         """, (row['Student'], row.get('Mathnasium ID'), row['Student Link'], enrolment_id, row['Year']))
-        student_id = curs.fetchone().get('id')
+        student_id = curs.fetchone().get('student_id')
         conn.commit()
 
         # Insert into account table
