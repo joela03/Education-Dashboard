@@ -77,3 +77,14 @@ def test_get_status_key():
     assert get_status_key("ENROLMENT", "ON HOLD") == 1
     assert get_status_key("Delivery", "IN-CENTRE") == 0
     assert get_status_key("DELIVERY", "@HOME") == 1
+
+    assert get_status_key("enrolment", "unknown") is None
+    assert get_status_key("delivery", "office") is None
+    assert get_status_key("random", "@home") is None
+    assert get_status_key("", "") is None
+    
+    assert get_status_key(None, None) is None
+    assert get_status_key(123, "enrolment") is None
+    assert get_status_key("enrolment", 456) is None
+    assert get_status_key([], {}) is None
+    assert get_status_key("delivery", []) is None

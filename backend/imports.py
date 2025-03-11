@@ -29,6 +29,9 @@ def get_cursor(connection: psycopg2.extensions.connection) -> psycopg2.extension
 
 def get_status_key(status_type: str, status: str) -> int | None:
     """Returns a key based on the given status type and value."""
+
+    if not isinstance(status_type, str) or not isinstance(status, str):
+        return None
     
     status_mappings = {
         "enrolment": {
