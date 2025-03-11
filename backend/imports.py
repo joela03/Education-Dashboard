@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
-from functions import safe_date
+from functions import safe_date, percentage_to_float
 
 def get_db_connection():
     """Sets up connection with database"""
@@ -92,7 +92,7 @@ def import_students_to_database(conn, df):
             safe_date(row['Last PR Sent']),
             safe_date(row['Last Progress Check']),
             row['Mathnasium ID'], row['Total LP Skills Mastered'],
-            row['Total LP Skills'], row['% Skills Mastered']
+            row['Total LP Skills'], percentage_to_float(row['% Skills Mastered'])
         ))
         conn.commit()
 
