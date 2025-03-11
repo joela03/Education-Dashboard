@@ -67,10 +67,10 @@ def import_students_to_database(conn, df):
 
         # Insert into account table
         curs.execute("""
-            INSERT INTO account (id, student_id, account_name, account_link)
+            INSERT INTO account (student_id, account_name, account_link)
             VALUES (%s, %s, %s, %s)
             ON CONFLICT (student_id) DO NOTHING;
-        """, (row.get('Mathnasium ID'), student_id, row['Account Name'], row['Account Link']))
+        """, (student_id, row['Account Name'], row['Account Link']))
         conn.commit()
 
         # Insert into student_education_stats table
