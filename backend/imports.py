@@ -53,7 +53,7 @@ def import_students_to_database(conn, df):
 
     for _, row in df.iterrows():
         # Convert Enrolment Status and Delivery to keys
-        enrolment_status = row.get('Enrolment', '').strip()
+        enrolment_status = row.get('Enrolment Status', '').strip()
         enrolment_id = get_status_key('enrolment', enrolment_status)
 
         delivery_type = row.get('Delivery', '').strip()
@@ -134,7 +134,7 @@ def import_students_to_database(conn, df):
                 VALUES (%s, %s)
                 ON CONFLICT (guardian_id) DO UPDATE 
                 SET guardian_phone = EXCLUDED.guardian_phone
-                RETURNING id;
+                RETURNING guardian_id;
             """, (guardian_name.strip(), guardian_phone.strip()))
             guardian_id = curs.fetchone()[0]
             conn.commit()
