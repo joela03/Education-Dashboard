@@ -9,8 +9,9 @@ CREATE TABLE "delivery" (
 );
 
 CREATE TABLE "student_information" (
-    "id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "student_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "name" VARCHAR(255) NOT NULL,
+    "mathnasium_id" BIGINT NOT NULL,
     "student_link" VARCHAR(500),
     "enrolment_id" BIGINT,
     "year" BIGINT NOT NULL,
@@ -18,7 +19,7 @@ CREATE TABLE "student_information" (
 );
 
 CREATE TABLE "account" (
-    "id" BIGINT NOT NULL PRIMARY KEY,
+    "id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "student_id" BIGINT NOT NULL UNIQUE,
     "account_name" VARCHAR(255) NOT NULL,
     "account_link" VARCHAR(500),
