@@ -23,7 +23,7 @@ CREATE TABLE "account" (
     "student_id" BIGINT NOT NULL UNIQUE,
     "account_name" VARCHAR(255) NOT NULL,
     "account_link" VARCHAR(500),
-    FOREIGN KEY ("student_id") REFERENCES "student_information"("id") ON DELETE CASCADE
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE
 );
 
 CREATE TABLE "student_education_stats" (
@@ -56,7 +56,7 @@ CREATE TABLE "student_guardians" (
     "student_id" BIGINT NOT NULL,
     "guardian_id" BIGINT NOT NULL,
     PRIMARY KEY ("student_id", "guardian_id"),
-    FOREIGN KEY ("student_id") REFERENCES "student_information"("id") ON DELETE CASCADE,
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
     FOREIGN KEY ("guardian_id") REFERENCES "guardians"("id") ON DELETE RESTRICT
 );
 
