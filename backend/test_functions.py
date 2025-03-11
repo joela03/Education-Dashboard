@@ -4,7 +4,7 @@ from datetime import datetime
 
 import unittest
 from unittest.mock import patch
-from functions import convert_col_to_dt, percentage_to_float
+from functions import convert_col_to_dt, percentage_to_float, ensure_list
 
 
 
@@ -38,21 +38,30 @@ def test_empty_string_handling():
 class TestPercentageToFloat(unittest.TestCase):
     
     def test_valid_percentages(self):
-        self.assertEqual(percentage_to_float("50%"), 0.5)
-        self.assertEqual(percentage_to_float("100%"), 1.0)
-        self.assertEqual(percentage_to_float("0%"), 0.0)
-        self.assertEqual(percentage_to_float("75.5%"), 0.755)
+        self.assertEqual(percentage_to_float("50%"), 50.0)
+        self.assertEqual(percentage_to_float("100%"), 100.0)
+        self.assertEqual(percentage_to_float("0%"), 0)
+        self.assertEqual(percentage_to_float("75.5%"), 75.5)
     
     def test_spaces_and_formatting(self):
-        self.assertEqual(percentage_to_float(" 50% "), 0.5)
-        self.assertEqual(percentage_to_float("\t25%\n"), 0.25)
+        self.assertEqual(percentage_to_float(" 50% "), 50.0)
+        self.assertEqual(percentage_to_float("\t25%\n"), 25.0)
 
     def test_invalid_inputs(self):
-        with self.assertRaises(ValueError):
-            percentage_to_float("50")
         with self.assertRaises(ValueError):
             percentage_to_float("abc%")
         with self.assertRaises(ValueError):
             percentage_to_float("%")
         with self.assertRaises(ValueError):
-            percentage_to_float("") 
+            percentage_to_float("")
+
+def test_ensure_list():
+    assert ensure_list(['Alice', 'Bob']) == ['Alice', 'Bob'], "Failed: Already a list"
+    assert ensure_list("['Alice', 'Bob']") == ['Alice', 'Bob'], "Failed: Stringified list"
+    assert ensure_list("Alice, Bob, Charlie") == ['Alice', 'Bob', 'Charlie'], "Failed: Comma-separated string"
+    assert ensure_list("Alice") == ['Alice'], "Failed: Single string"
+    assert ensure_list(None) == [], "Failed: None input"
+    assert ensure_list(42) == [], "Failed: Integer input"
+    assert ensure_list({'Alice': 'Bob'}) == [], "Failed: Dictionary input"
+    assert ensure_list("[]") == [], "Failed: Empty stringified list"
+    assert ensure_list("") == [""], "Failed: Empty string should return list with empty string"

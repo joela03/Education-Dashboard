@@ -2,6 +2,7 @@
 import os
 import time
 from datetime import datetime, timedelta
+import ast
 
 import pandas as pd
 from pandas import isna
@@ -253,3 +254,18 @@ def percentage_to_float(string):
         return float(string.strip().replace('%', ''))
     except ValueError:
         raise ValueError(f"Invalid percentage format: {string}")
+    
+def ensure_list(value):
+    """Ensures the input is always a list"""
+    if isinstance(value, list):
+        return value
+
+    if isinstance(value, str):
+        try:
+            evaluated_value = ast.literal_eval(value)
+            if isinstance(evaluated_value, list):
+                return evaluated_value
+        except (ValueError, SyntaxError):
+            return value.split(', ')
+
+    return [] 

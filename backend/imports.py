@@ -3,7 +3,11 @@ import os
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
+<<<<<<< HEAD
 from functions import safe_date, percentage_to_float
+=======
+from functions import (safe_date, percentage_to_float, ensure_list)
+>>>>>>> origin/main
 
 def get_db_connection():
     """Sets up connection with database"""
@@ -105,14 +109,16 @@ def import_students_to_database(conn, df):
         if not isinstance(guardian_phones, list):
             guardian_phones = [guardian_phones]
 
+        guardians = ensure_list(row.get('Guardians'))
+        guardian_phones = ensure_list(row.get('Guardian Phone Numbers'))
+        
         for guardian_name, guardian_phone in zip(guardians, guardian_phones):
             curs.execute("""
                 INSERT INTO guardians (guardian_name, guardian_phone)
                 VALUES (%s, %s)
-                ON CONFLICT (guardian_name, guardian_phone) DO NOTHING
                 RETURNING id;
             """, (guardian_name.strip(), guardian_phone.strip()))
-            guardian_id = curs.fetchone().get('id')
+            guardian_id = curs.fetchone()[0]
             conn.commit()
 
             # Insert into student_guardians table
