@@ -68,7 +68,7 @@ CREATE TABLE "users" (
 );
 
 INSERT INTO enrolment_status (enrolment_id, enrolment_status) VALUES 
-    (0, 'Enrolled'),
+    (0, 'Enrolment'),
     (1, 'On Hold');
 
 INSERT INTO delivery (delivery_id, delivery_type) VALUES 

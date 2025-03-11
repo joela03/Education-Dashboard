@@ -32,7 +32,7 @@ def get_status_key(status_type: str, status: str) -> int | None:
     
     status_mappings = {
         "enrolment": {
-            "enrolled": 0,
+            "enrolment": 0,
             "on hold": 1
         },
         "delivery": {
@@ -50,7 +50,7 @@ def import_students_to_database(conn, df):
 
     for _, row in df.iterrows():
         # Convert Enrolment Status and Delivery to keys
-        enrolment_status = row.get('Enrolment Status', '').strip()
+        enrolment_status = row.get('Enrolment', '').strip()
         enrolment_id = get_status_key('enrolment', enrolment_status)
 
         delivery_type = row.get('Delivery', '').strip()
