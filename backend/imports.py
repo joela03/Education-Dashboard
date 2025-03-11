@@ -59,7 +59,7 @@ def import_students_to_database(conn, df):
         # Insert into student_information table
         curs.execute("""
             INSERT INTO student_information (name, mathnasium_id, student_link, enrolment_id, year)
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (mathnasium_id) DO UPDATE 
             SET name = EXCLUDED.name,
                 student_link = EXCLUDED.student_link,
@@ -73,7 +73,7 @@ def import_students_to_database(conn, df):
         # Insert into account table
         curs.execute("""
             INSERT INTO account (student_id, account_name, account_link)
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s)
             ON CONFLICT (student_id) DO UPDATE 
             SET account_name = EXCLUDED.account_name,
                 account_link = EXCLUDED.account_link;
