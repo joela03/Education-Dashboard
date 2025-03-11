@@ -57,7 +57,7 @@ CREATE TABLE "student_guardians" (
     "guardian_id" BIGINT NOT NULL,
     PRIMARY KEY ("student_id", "guardian_id"),
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
-    FOREIGN KEY ("guardian_id") REFERENCES "guardians"("id") ON DELETE RESTRICT
+    FOREIGN KEY ("guardian_id") REFERENCES "guardians"("guardian_id") ON DELETE RESTRICT
 );
 
 CREATE TABLE "users" (
