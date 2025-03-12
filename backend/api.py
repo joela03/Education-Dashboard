@@ -11,7 +11,7 @@ def endpoint_index():
     return jsonify({"message": "Welcome to the Mathnasium API"})
 
 @app.route("/attendance", methods=["GET"])
-def endpoint_get_movies():
+def endpoint_get_attendance():
     """Returns students that have attended in a given period"""
 
 if __name__ == "__main__":
