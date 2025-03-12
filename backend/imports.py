@@ -80,10 +80,10 @@ def import_students_to_database(conn, df):
         # Insert into accounts table
         curs.execute("""
             INSERT INTO accounts (account_name, account_link)
-            VALUES (%s, %s, %s)
+            VALUES (%s, %s)
             ON CONFLICT (account_name) DO NOTHING
             RETURNING account_id;
-        """, (student_id, row['Account Name'], row['Account Link']))
+        """, (row['Account Name'], row['Account Link']))
         account_id = curs.fetchone().get('account_id')
         conn.commit()
         
@@ -91,8 +91,7 @@ def import_students_to_database(conn, df):
         curs.execute("""
             INSERT INTO student_accounts (student_id, account_id)
             VALUES (%s, %s)
-            ON CONFLICT (student_id) DO UPDATE 
-            SET account_id = EXCLUDED.account_id;
+            ON CONFLICT DO NOTHING;
         """, (student_id, account_id))
         conn.commit()
 

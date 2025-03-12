@@ -21,8 +21,7 @@ CREATE TABLE "student_information" (
 CREATE TABLE "accounts" (
     "account_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "account_name" VARCHAR(255) NOT NULL UNIQUE,
-    "account_link" VARCHAR(500),
-    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE
+    "account_link" VARCHAR(500)
 );
 
 CREATE TABLE "student_accounts" (
