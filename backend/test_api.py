@@ -13,3 +13,9 @@ def test_index_route(client):
     response = client.get("/")
     assert response.status_code == 200
     assert response.json == {"message": "Welcome to the Mathnasium API"}
+
+def test_get_attendance(client):
+    """Test GET /attendance route."""
+    response = client.get("/attendance")
+    assert response.status_code == 200
+    assert isinstance(response.json, dict) or isinstance(response.json, list)
