@@ -84,7 +84,20 @@ def import_students_to_database(conn, df):
             ON CONFLICT (account_name) DO NOTHING
             RETURNING account_id;
         """, (row['Account Name'], row['Account Link']))
-        account_id = curs.fetchone().get('account_id')
+        account = curs.fetchone()
+        conn.commit()
+
+        if account:
+            account_id = account['account_id']
+        else:
+            # Fetch existing account_id if no insertions
+            curs.execute("SELECT account_id FROM accounts WHERE account_name = %s", (row['Account Name'],))
+            account = curs.fetchone()
+            if account:
+                account_id = account['account_id']
+            else:
+                raise ValueError("Failed to retrieve account_id for account_name:", row['Account Name'])
+
         conn.commit()
         
         # Insert into student_accounts table
