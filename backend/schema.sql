@@ -54,7 +54,7 @@ CREATE TABLE "student_education_stats" (
 
 CREATE TABLE "guardians" (
     "guardian_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    "guardian_name" VARCHAR(255) NOT NULL,
+    "guardian_name" VARCHAR(255) NOT NULL UNIQUE,
     "guardian_phone" VARCHAR(255)
 );
 
