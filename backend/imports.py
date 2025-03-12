@@ -69,7 +69,8 @@ def import_students_to_database(conn, df):
                 enrolment_id = EXCLUDED.enrolment_id,
                 year = EXCLUDED.year
             RETURNING student_id;
-        """, (row['Student'], row.get('Mathnasium ID'), row['Student Link'], enrolment_id, row['Year']))
+        """, (row['Student'], row.get('Mathnasium ID'), row['Student Link'], enrolment_id, 
+            0 if row['Year'] == "Reception" else row['Year']))
         student_id = curs.fetchone().get('student_id')
         conn.commit()
 
@@ -136,7 +137,7 @@ def import_students_to_database(conn, df):
                 SET guardian_phone = EXCLUDED.guardian_phone
                 RETURNING guardian_id;
             """, (guardian_name.strip(), guardian_phone.strip()))
-            guardian_id = curs.fetchone()[0]
+            guardian_id = curs.fetchone().get('guardian_id')
             conn.commit()
 
             # Insert into student_guardians table
