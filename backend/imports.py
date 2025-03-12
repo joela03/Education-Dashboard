@@ -69,8 +69,11 @@ def import_students_to_database(conn, df):
                 enrolment_id = EXCLUDED.enrolment_id,
                 year = EXCLUDED.year
             RETURNING student_id;
-        """, (row['Student'], row.get('Mathnasium ID'), row['Student Link'], enrolment_id, 
-            0 if row['Year'] == "Reception" else row['Year']))
+        """, (row['Student'],
+            row.get('Mathnasium ID'),
+            row['Student Link'], enrolment_id, 
+            0 if row['Year'] == "Reception" else (13 if row['Year'] == "College" else row['Year']),
+            ))
         student_id = curs.fetchone().get('student_id')
         conn.commit()
 

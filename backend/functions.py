@@ -268,4 +268,4 @@ def ensure_list(value):
         except (ValueError, SyntaxError):
             return value.split(', ')
 
-    return [] 
+    return []
