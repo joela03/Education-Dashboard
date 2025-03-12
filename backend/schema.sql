@@ -11,7 +11,7 @@ CREATE TABLE "delivery" (
 CREATE TABLE "student_information" (
     "student_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "name" VARCHAR(255) NOT NULL,
-    "mathnasium_id" BIGINT NOT NULL,
+    "mathnasium_id" BIGINT UNIQUE NOT NULL,
     "student_link" VARCHAR(500),
     "enrolment_id" BIGINT,
     "year" BIGINT NOT NULL,
@@ -20,10 +20,17 @@ CREATE TABLE "student_information" (
 
 CREATE TABLE "accounts" (
     "account_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    "student_id" BIGINT NOT NULL UNIQUE,
-    "account_name" VARCHAR(255) NOT NULL,
+    "account_name" VARCHAR(255) NOT NULL UNIQUE,
     "account_link" VARCHAR(500),
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE
+);
+
+CREATE TABLE "student_accounts" (
+    "student_id" BIGINT NOT NULL,
+    "account_id" BIGINT NOT NULL,
+    PRIMARY KEY ("student_id", "account_id"),
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
+    FOREIGN KEY ("account_id") REFERENCES "accounts"("account_id") ON DELETE RESTRICT
 );
 
 CREATE TABLE "student_education_stats" (

@@ -79,12 +79,21 @@ def import_students_to_database(conn, df):
 
         # Insert into accounts table
         curs.execute("""
-            INSERT INTO accounts (student_id, account_name, account_link)
+            INSERT INTO accounts (account_name, account_link)
             VALUES (%s, %s, %s)
-            ON CONFLICT (account_name) DO UPDATE 
-            SET account_name = EXCLUDED.account_name,
-                account_link = EXCLUDED.account_link;
+            ON CONFLICT (account_name) DO NOTHING
+            RETURNING account_id;
         """, (student_id, row['Account Name'], row['Account Link']))
+        account_id = curs.fetchone().get('account_id')
+        conn.commit()
+        
+        # Insert into student_accounts table
+        curs.execute("""
+            INSERT INTO student_accounts (student_id, account_id)
+            VALUES (%s, %s)
+            ON CONFLICT (student_id) DO UPDATE 
+            SET account_id = EXCLUDED.account_id;
+        """, (student_id, account_id))
         conn.commit()
 
         # Insert into student_education_stats table
