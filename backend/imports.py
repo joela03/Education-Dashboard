@@ -63,7 +63,7 @@ def import_students_to_database(conn, df):
         curs.execute("""
             INSERT INTO student_information (name, mathnasium_id, student_link, enrolment_id, year)
             VALUES (%s, %s, %s, %s, %s)
-            ON CONFLICT (student_id) DO UPDATE 
+            ON CONFLICT (mathnasium_id) DO UPDATE 
             SET name = EXCLUDED.name,
                 student_link = EXCLUDED.student_link,
                 enrolment_id = EXCLUDED.enrolment_id,
@@ -81,7 +81,7 @@ def import_students_to_database(conn, df):
         curs.execute("""
             INSERT INTO accounts (student_id, account_name, account_link)
             VALUES (%s, %s, %s)
-            ON CONFLICT (account_id) DO UPDATE 
+            ON CONFLICT (account_name) DO UPDATE 
             SET account_name = EXCLUDED.account_name,
                 account_link = EXCLUDED.account_link;
         """, (student_id, row['Account Name'], row['Account Link']))
@@ -136,7 +136,7 @@ def import_students_to_database(conn, df):
             curs.execute("""
                 INSERT INTO guardians (guardian_name, guardian_phone)
                 VALUES (%s, %s)
-                ON CONFLICT (guardian_id) DO UPDATE 
+                ON CONFLICT (guardian_name) DO UPDATE 
                 SET guardian_phone = EXCLUDED.guardian_phone
                 RETURNING guardian_id;
             """, (guardian_name.strip(), guardian_phone.strip()))
