@@ -10,11 +10,9 @@ def endpoint_index():
     """Sets up index route"""
     return jsonify({"message": "Welcome to the Mathnasium API"})
 
-@app.route("/attendance", methods=["GET", "POST"])
+@app.route("/attendance", methods=["GET"])
 def endpoint_get_movies():
     """Returns students that have attended in a given period"""
-
-    
 
 if __name__ == "__main__":
     app.config['TESTING'] = True
