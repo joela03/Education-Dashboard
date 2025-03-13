@@ -1,5 +1,6 @@
 """Functions that query the mathnasium database"""
 
+from database_functions import get_student_attendance
 from flask import Flask, jsonify, request
 
 app = Flask(__name__)
@@ -13,6 +14,13 @@ def endpoint_index():
 @app.route("/attendance", methods=["GET"])
 def endpoint_get_attendance():
     """Returns students that have attended in a given period"""
+
+    students = get_student_attendance()
+
+    if students == []:
+        return {"error": "Students not found"}, 404
+
+    return jsonify(students), 200
 
 if __name__ == "__main__":
     app.config['TESTING'] = True
