@@ -1,7 +1,6 @@
 import * as React from "react"
 
 import { SearchForm } from "@/components/search-form"
-import { VersionSwitcher } from "@/components/version-switcher"
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +16,6 @@ import {
 
 // This is sample data.
 const data = {
-  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
   navMain: [
     {
       title: "Education Management",
@@ -47,7 +45,7 @@ const data = {
         },
         {
           title: "Attendance",
-          url: "/dashboard/risk/pace",
+          url: "/dashboard/risk/attendance",
           isActive: true,
         }
       ],
@@ -55,27 +53,33 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({
+  onSelectPage,
+  ...props
+}: React.ComponentProps<typeof Sidebar> & { onSelectPage: (page: string) => void }) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-        <VersionSwitcher
-          versions={data.versions}
-          defaultVersion={data.versions[0]}
-        />
         <SearchForm />
       </SidebarHeader>
       <SidebarContent>
-        {/* We create a SidebarGroup for each parent. */}
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {item.items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                {item.items.map((subItem) => (
+                  <SidebarMenuItem key={subItem.title}>
+                    <SidebarMenuButton asChild isActive={subItem.isActive}>
+                      <a
+                        href={subItem.url}
+                        onClick={(e) => {
+                          e.preventDefault()
+                          onSelectPage(subItem.url)
+                        }}
+                      >
+                        {subItem.title}
+                      </a>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
