@@ -26,7 +26,7 @@ export default function Page() {
   const fetchAttendanceData = async () => {
     setLoading(true)
     try {
-      const response = await fetch("/attendance")
+      const response = await fetch("http://localhost:5000/attendance")
       const data = await response.json()
       setAttendanceData(data)
     } catch (error) {
