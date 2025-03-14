@@ -1,10 +1,11 @@
 """Functions that query the mathnasium database"""
 
 from database_functions import get_student_attendance
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+CORS(app)
 
 @app.route("/", methods=["GET"])
 def endpoint_index():
