@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DataTable } from "@/components/ui/DataTable"
-import { attendanceColumns, AttendanceData } from "@/configs/tableConfigs"
+import { attendanceColumns, AttendanceData, progressCheckColumns, ProgressCheckData } from "@/configs/tableConfigs"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,6 +22,7 @@ import {
 export default function Page() {
   const [selectedPage, setSelectedPage] = useState("default")
   const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([])
+  const [progressCheckData, setProgressCheckData] = useState<ProgressCheckData[]>([])
   const [loading, setLoading] = useState(false)
 
   const fetchAttendanceData = async () => {
@@ -37,9 +38,28 @@ export default function Page() {
     }
   }
 
+  const fetchProgressCheckData = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch("http://localhost:5000/progress_check")
+      const data = await response.json()
+      setProgressCheckData(data)
+    } catch (error) {
+      console.error("Error fetching attendance data:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (selectedPage === "/dashboard/risk/attendance") {
       fetchAttendanceData();
+    }
+  }, [selectedPage]);
+
+  useEffect(() => {
+    if (selectedPage === "/dashboard/edu/progress-check") {
+      fetchProgressCheckData();
     }
   }, [selectedPage]);
 
@@ -68,6 +88,13 @@ export default function Page() {
               <p>Loading attendance data...</p>
             ) : (
               <DataTable columns={attendanceColumns} data={attendanceData} />
+            )
+          ) :         
+            selectedPage === "/dashboard/edu/progress-check" ? (
+            loading ? (
+              <p>Loading progress check data...</p>
+            ) : (
+              <DataTable columns={progressCheckColumns} data={progressCheckData} />
             )
           ) : (
             <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
