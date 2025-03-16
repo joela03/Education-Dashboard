@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { DataTable } from "@/components/ui/DataTable"
+import { attendanceColumns, AttendanceData } from "@/configs/tableConfigs"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -19,10 +21,9 @@ import {
 
 export default function Page() {
   const [selectedPage, setSelectedPage] = useState("default")
-  const [attendanceData, setAttendanceData] = useState(null)
+  const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([])
   const [loading, setLoading] = useState(false)
 
-  // Function to fetch attendance data
   const fetchAttendanceData = async () => {
     setLoading(true)
     try {
@@ -36,12 +37,11 @@ export default function Page() {
     }
   }
 
-  // Fetch data when "Attendance" is selected
   useEffect(() => {
     if (selectedPage === "/dashboard/risk/attendance") {
-      fetchAttendanceData()
+      fetchAttendanceData();
     }
-  }, [selectedPage])
+  }, [selectedPage]);
 
   return (
     <SidebarProvider>
@@ -66,12 +66,8 @@ export default function Page() {
           {selectedPage === "/dashboard/risk/attendance" ? (
             loading ? (
               <p>Loading attendance data...</p>
-            ) : attendanceData ? (
-              <pre className="bg-gray-100 p-4 rounded-lg">
-                {JSON.stringify(attendanceData, null, 2)}
-              </pre>
             ) : (
-              <p>No attendance data available.</p>
+              <DataTable columns={attendanceColumns} data={attendanceData} />
             )
           ) : (
             <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
