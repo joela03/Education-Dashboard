@@ -23,6 +23,16 @@ export type AttendanceData = {
   student_link: string
 }
 
+export type ProgressCheckData = {
+  name: string
+  mathnasium_id: string
+  student_link: string
+  enrolment_status: string
+  skills_masteres_percent: Float16Array
+  last_assessment: Date
+  last_progress_check: Date
+}
+
 export const attendanceColumns: ColumnDef<AttendanceData>[] = [
   {
     accessorKey: "name",
@@ -71,5 +81,46 @@ export const attendanceColumns: ColumnDef<AttendanceData>[] = [
         </a>
       );
     },
+  },
+];
+
+export const progressCheckColumns: ColumnDef<ProgressCheckData>[] = [
+  {
+    accessorKey: "name",
+    header: "Student Name",
+    cell: ({ row }) => {
+        const name = row.original.name;
+        const studentLink = row.original.student_link;
+    
+        return (
+            <a href={studentLink} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+                {name}
+            </a>
+        );
+    },
+  },
+  {
+    accessorKey: "mathnasium_id",
+    header: "Mathnasium ID",
+  },
+  {
+    accessorKey: "skills_mastered_percent",
+    header: "Skills Mastered Percent",
+  },
+  {
+    accessorKey: "last_assessment",
+    header: "Last Assessment",
+    cell: ({ row }) => {
+      const lastAssessment = row.original.last_assessment;
+      return <span>{parseDate(lastAssessment)}</span>;
+    }
+  },
+  {
+    accessorKey: "last_progress_check",
+    header: "Last Progress Check",
+    cell: ({ row }) => {
+      const lastProgressCheck = row.original.last_progress_check;
+      return <span>{parseDate(lastProgressCheck)}</span>;
+    }
   },
 ];
