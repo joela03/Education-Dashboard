@@ -19,7 +19,7 @@ def get_student_attendance():
                 LEFT JOIN student_education_stats AS ses ON si.student_id = ses.student_id
                 LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
                 WHERE ses.attendance_count < 5
-                AND ses.last_attendance < CURRENT_DATE - INTERVAL '7 days'
+                OR ses.last_attendance < CURRENT_DATE - INTERVAL '7 days'
                 ;""")
     data = curs.fetchall()
     curs.close()
