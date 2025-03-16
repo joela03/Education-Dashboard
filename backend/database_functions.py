@@ -1,7 +1,5 @@
 """Functions that write to or query the mathnasium database"""
 
-import psycopg2
-from psycopg2.extensions import connection
 from imports import (get_cursor, get_db_connection)
 
 def get_student_attendance():
