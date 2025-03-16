@@ -26,3 +26,25 @@ def get_student_attendance():
     conn.close()
 
     return data
+
+def get_progress_check():
+    """Query the database for students that need a progress check"""
+
+    conn = get_db_connection()
+    curs = get_cursor(conn)
+
+    curs.execute(""" SELECT si.name, es.enrolment_status, si.mathnasium_id,
+                si.student_link, ses.last_assessment, ses.last_progress_check,
+                ses.skills_mastered_percent
+                FROM student_information as si
+                LEFT JOIN student_education_stats AS ses on si.student_id = ses.student_id
+                LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
+                WHERE ses.skills_mastered_percent > 45
+                OR ses.last_assessment < CURRENT_DATE - INTERVAL '3 months'
+                ;""")
+    
+    data = curs.fetchall()
+    curs.close()
+    conn. close()
+
+    return data
