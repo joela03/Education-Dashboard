@@ -67,3 +67,23 @@ def get_checkup_data():
     conn. close()
 
     return data
+
+def get_plan_pace():
+    """Queries the database for students that aren't on pace"""
+    
+    conn = get_db_connection()
+    curs = get_cursor(conn)
+
+    curs.execute(""" SELECT si.name, es.enrolment_status, si.mathnasium_id,
+                si.student_link, ses.last_assessment, ses.skills_mastered_percent
+                FROM student_information as si
+                LEFT JOIN student_education_stats AS ses on si.student_id = ses.student_id
+                LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
+                WHERE (EXTRACT(DAY FROM (CURRENT_DATE::timestamp - ses.last_assessment::timestamp)) / 7) * 4 > ses.skills_mastered_percent
+                ;""")
+    
+    data = curs.fetchall()
+    curs.close()
+    conn. close()
+
+    return data
