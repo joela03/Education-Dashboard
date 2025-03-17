@@ -1,6 +1,7 @@
 "use client"
 import React from "react";
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef} from "@tanstack/react-table"
+
 
 const parseDate = (date: string | Date) => {
   const parsedDate = new Date(date);
