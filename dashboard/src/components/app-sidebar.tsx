@@ -14,9 +14,19 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 
-// This is sample data.
+
 const data = {
   navMain: [
+    {
+      title: "Home",
+      url: "#",
+      items: [
+        {
+          title: "General",
+          url: "/dashboard/general",
+        },
+      ],
+    },
     {
       title: "Education Management",
       url: "#",
@@ -39,10 +49,6 @@ const data = {
       title: "At Risk",
       url: "/dashboard/risk",
       items: [
-        {
-          title: "General",
-          url: "/dashboard/risk/general",
-        },
         {
           title: "Attendance",
           url: "/dashboard/risk/attendance",
@@ -70,7 +76,7 @@ export function AppSidebar({
               <SidebarMenu>
                 {item.items.map((subItem) => (
                   <SidebarMenuItem key={subItem.title}>
-                    <SidebarMenuButton asChild isActive={subItem.isActive}>
+                    <SidebarMenuButton asChild isActive={subItem.isActive ?? false}>
                       <a
                         href={subItem.url}
                         onClick={(e) => {
