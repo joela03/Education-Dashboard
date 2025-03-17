@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { DataTable } from "@/components/ui/DataTable"
+import { DataTable } from "@/components/data-table"
 import { attendanceColumns, AttendanceData, progressCheckColumns, ProgressCheckData } from "@/configs/tableConfigs"
 import {
   Breadcrumb,
