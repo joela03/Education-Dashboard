@@ -46,3 +46,24 @@ def get_progress_check():
     conn. close()
 
     return data
+
+def get_checkup_data():
+    """Queries the database for students that need a post checkup"""
+    
+    conn = get_db_connection()
+    curs = get_cursor(conn)
+
+    curs.execute(""" SELECT si.name, es.enrolment_status, si.mathnasium_id,
+                si.student_link, ses.last_assessment, ses.skills_mastered_percent
+                FROM student_information as si
+                LEFT JOIN student_education_stats AS ses on si.student_id = ses.student_id
+                LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
+                WHERE ses.skills_mastered_percent > 85
+                OR ses.last_assessment < CURRENT_DATE - INTERVAL '24 weeks'
+                ;""")
+    
+    data = curs.fetchall()
+    curs.close()
+    conn. close()
+
+    return data
