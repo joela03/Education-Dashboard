@@ -1,6 +1,6 @@
 """Functions that query the mathnasium database"""
 
-from database_functions import (get_student_attendance, get_progress_check)
+from database_functions import (get_student_attendance, get_progress_check, get_checkup_data)
 from flask import Flask, jsonify
 from flask_cors import CORS
 
@@ -25,9 +25,20 @@ def endpoint_get_attendance():
 
 @app.route("/progress_check", methods=["GET"])
 def endpoint_get_progress_check():
-    """Returns students that have attended in a given period"""
+    """Returns students that need a progress check"""
 
     students = get_progress_check()
+
+    if students == []:
+        return {"error": "Students not found"}, 404
+
+    return jsonify(students), 200
+
+@app.route("/checkup", methods=["GET"])
+def endpoint_get_checkup():
+    """Returns students that need a checkup"""
+
+    students = get_checkup_data()
 
     if students == []:
         return {"error": "Students not found"}, 404
