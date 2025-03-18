@@ -37,11 +37,11 @@ const data = {
         },
         {
           title: "Check-Up Status",
-          url: "/dashboard/edu/check-up",
+          url: "/dashboard/edu/checkup",
         },
         {
           title: "Plan Pace",
-          url: "/dashboard/edu/plan-pace",
+          url: "/dashboard/edu/planpace",
         },
       ],
     },
