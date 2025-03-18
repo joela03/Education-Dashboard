@@ -1,4 +1,6 @@
 "use client"
+
+import moment from "moment";
 import React from "react";
 import { ColumnDef} from "@tanstack/react-table"
 
@@ -11,6 +13,16 @@ const parseDate = (date: string | Date) => {
     year: 'numeric',
     month: 'short',
   });
+};
+
+const monthsSinceDate = (date: Date) =>{
+  const currentDate = new Date();
+
+  const dateMoment = moment(date);
+  const currentDateMoment = moment(currentDate);
+
+  return currentDateMoment.diff(dateMoment, "months", true).toFixed(2);
+  
 };
 
 export type AttendanceData = {
@@ -29,9 +41,10 @@ export type ProgressCheckData = {
   mathnasium_id: string
   student_link: string
   enrolment_status: string
-  skills_masteres_percent: Float16Array
+  skills_mastered_percent: Float16Array
   last_assessment: Date
   last_progress_check: Date
+  months_since_last_attendance: Date
 }
 
 export const attendanceColumns: ColumnDef<AttendanceData>[] = [
@@ -122,6 +135,14 @@ export const progressCheckColumns: ColumnDef<ProgressCheckData>[] = [
     cell: ({ row }) => {
       const lastProgressCheck = row.original.last_progress_check;
       return <span>{parseDate(lastProgressCheck)}</span>;
+    }
+  },
+  {
+    accessorKey: "months_since_last_progress_check",
+    header: "Months SinceLast Progress Check",
+    cell: ({ row }) => {
+      const lastProgressCheck = row.original.last_progress_check;
+      return <span>{monthsSinceDate(lastProgressCheck)}</span>;
     }
   },
 ];
