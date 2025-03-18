@@ -1,6 +1,6 @@
 "use client"
 
-import moment from "moment";
+import dayjs from "dayjs";
 import React from "react";
 import { ColumnDef} from "@tanstack/react-table"
 
@@ -15,14 +15,9 @@ const parseDate = (date: string | Date) => {
   });
 };
 
-const monthsSinceDate = (date: Date) =>{
-  const currentDate = new Date();
 
-  const dateMoment = moment(date);
-  const currentDateMoment = moment(currentDate);
-
-  return currentDateMoment.diff(dateMoment, "months", true).toFixed(2);
-  
+const timeSinceDate = (date: Date, period: "day" | "week" | "month"): number => {
+  return dayjs().diff(dayjs(date), period, true);
 };
 
 export type AttendanceData = {
@@ -45,6 +40,17 @@ export type ProgressCheckData = {
   last_assessment: Date
   last_progress_check: Date
   months_since_last_attendance: Date
+}
+
+export type PlanPaceData = {
+  name: string
+  mathnasium_id: string
+  student_link: string
+  enrolment_status: string
+  skills_mastered_percent: Float16Array
+  last_assessment: Date
+  weeks_since_last_assessment: BigInteger
+  expected_plan_percentage: string
 }
 
 export const attendanceColumns: ColumnDef<AttendanceData>[] = [
@@ -142,7 +148,56 @@ export const progressCheckColumns: ColumnDef<ProgressCheckData>[] = [
     header: "Months SinceLast Progress Check",
     cell: ({ row }) => {
       const lastProgressCheck = row.original.last_progress_check;
-      return <span>{monthsSinceDate(lastProgressCheck)}</span>;
+      return <span>{timeSinceDate(lastProgressCheck, "month")}</span>;
+    }
+  },
+];
+
+export const planPaceColumns: ColumnDef<PlanPaceData>[] = [
+  {
+    accessorKey: "name",
+    header: "Student Name",
+    cell: ({ row }) => {
+        const name = row.original.name;
+        const studentLink = row.original.student_link;
+    
+        return (
+            <a href={studentLink} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+                {name}
+            </a>
+        );
+    },
+  },
+  {
+    accessorKey: "mathnasium_id",
+    header: "Mathnasium ID",
+  },
+  {
+    accessorKey: "skills_mastered_percent",
+    header: "Skills Mastered Percent",
+  },
+  {
+    accessorKey: "last_assessment",
+    header: "Last Assessment",
+    cell: ({ row }) => {
+      const lastAssessment = row.original.last_assessment;
+      return <span>{parseDate(lastAssessment)}</span>;
+    }
+  },
+  {
+    accessorKey: "weeks_since_last_progress_check",
+    header: "Weeks Since Last Assessment",
+    cell: ({ row }) => {
+      const lastProgressCheck = row.original.last_assessment;
+      return <span>{timeSinceDate(lastProgressCheck, "week")}</span>;
+    }
+  },
+  {
+    accessorKey: "expected_plan_percentage",
+    header: "Expected Plan Percentage",
+    cell: ({ row }) => {
+      const lastProgressCheck = row.original.last_assessment;
+      return <span>{timeSinceDate(lastProgressCheck, "week")*4}</span>;
     }
   },
 ];
