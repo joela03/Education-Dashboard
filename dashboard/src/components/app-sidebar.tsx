@@ -33,7 +33,7 @@ const data = {
       items: [
         {
           title: "Progress Check Status",
-          url: "/dashboard/edu/progress-check",
+          url: "/dashboard/edu/progress_check",
         },
         {
           title: "Check-Up Status",

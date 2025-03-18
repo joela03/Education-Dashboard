@@ -37,48 +37,13 @@ export default function Page() {
       setLoading(false);
     }
   };
-  
-  const fetchAttendanceData = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch("http://localhost:5000/attendance")
-      const data = await response.json()
-      setAttendanceData(data)
-    } catch (error) {
-      console.error("Error fetching attendance data:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const fetchProgressCheckData = async () => {
-    setLoading(true)
-    try {
-      const response = await fetch("http://localhost:5000/progress_check")
-      const data = await response.json()
-      setProgressCheckData(data)
-    } catch (error) {
-      console.error("Error fetching attendance data:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   useEffect(() => {
-    if (selectedPage === "/dashboard/risk/attendance") {
-      fetchAttendanceData();
-    }
-  }, [selectedPage]);
-
-  useEffect(() => {
-    if (selectedPage === "/dashboard/edu/progress-check") {
-      fetchProgressCheckData();
-    }
-  }, [selectedPage]);
-
-  useEffect(() => {
-    if (selectedPage === "/dashboard/edu/checkup") {
-      fetchProgressCheckData();
+    const lastSegment = selectedPage.split("/").pop();
+    if (lastSegment === "attendance") {
+      fetchAPIData(lastSegment, setAttendanceData);
+    } else if (lastSegment === "progress_check") {
+      fetchAPIData(lastSegment, setProgressCheckData);
     }
   }, [selectedPage]);
 
@@ -109,7 +74,7 @@ export default function Page() {
               <DataTable columns={attendanceColumns} data={attendanceData} />
             )
           ) :         
-            selectedPage === "/dashboard/edu/progress-check" ? (
+            selectedPage === "/dashboard/edu/progress_check" ? (
             loading ? (
               <p>Loading progress check data...</p>
             ) : (
