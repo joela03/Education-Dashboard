@@ -39,7 +39,7 @@ export type ProgressCheckData = {
   skills_mastered_percent: Float16Array
   last_assessment: Date
   last_progress_check: Date
-  months_since_last_attendance: Date
+  months_since_last_assessment: Date
 }
 
 export type PlanPaceData = {
@@ -136,19 +136,19 @@ export const progressCheckColumns: ColumnDef<ProgressCheckData>[] = [
     }
   },
   {
+    accessorKey: "months_since_assessment",
+    header: "Months Since Last Assessment",
+    cell: ({ row }) => {
+      const lastAssessment = row.original.last_assessment;
+      return <span>{timeSinceDate(lastAssessment, "month").toFixed(1)}</span>;
+    }
+  },
+  {
     accessorKey: "last_progress_check",
     header: "Last Progress Check",
     cell: ({ row }) => {
       const lastProgressCheck = row.original.last_progress_check;
       return <span>{parseDate(lastProgressCheck)}</span>;
-    }
-  },
-  {
-    accessorKey: "months_since_last_progress_check",
-    header: "Months SinceLast Progress Check",
-    cell: ({ row }) => {
-      const lastProgressCheck = row.original.last_progress_check;
-      return <span>{timeSinceDate(lastProgressCheck, "month")}</span>;
     }
   },
 ];
