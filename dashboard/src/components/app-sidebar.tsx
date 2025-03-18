@@ -11,7 +11,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarRail,
 } from "@/components/ui/sidebar"
 
 
@@ -52,7 +51,6 @@ const data = {
         {
           title: "Attendance",
           url: "/dashboard/risk/attendance",
-          isActive: true,
         }
       ],
     },
@@ -64,26 +62,25 @@ export function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar> & { onSelectPage: (page: string) => void }) {
   return (
-    <Sidebar {...props}>
-      <SidebarHeader>
-        <SearchForm />
-      </SidebarHeader>
-      <SidebarContent>
+    <Sidebar {...props} className="rounded-lg border border-gray-200 shadow-lg">
+      <SidebarContent className="py-4">
         {data.navMain.map((item) => (
           <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+            <SidebarGroupLabel className="text-lg font-medium text-gray-700 mb-2">
+              {item.title}
+            </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.items.map((subItem) => (
                   <SidebarMenuItem key={subItem.title}>
-                    <SidebarMenuButton asChild isActive={subItem.isActive ?? false}>
+                    <SidebarMenuButton asChild>
                       <a
                         href={subItem.url}
                         onClick={(e) => {
                           e.preventDefault()
                           onSelectPage(subItem.url)
                         }}
-                      >
+                        className="block py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
                         {subItem.title}
                       </a>
                     </SidebarMenuButton>
@@ -94,7 +91,6 @@ export function AppSidebar({
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarRail />
     </Sidebar>
   )
 }
