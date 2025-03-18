@@ -25,6 +25,19 @@ export default function Page() {
   const [progressCheckData, setProgressCheckData] = useState<ProgressCheckData[]>([])
   const [loading, setLoading] = useState(false)
 
+  const fetchAPIData = async <T,>(endpoint: string, setData: React.Dispatch<React.SetStateAction<T[]>>) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`http://localhost:5000/${endpoint}`);
+      const data = await response.json();
+      setData(data);
+    } catch (error) {
+      console.error(`Error fetching ${endpoint} data:`, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
   const fetchAttendanceData = async () => {
     setLoading(true)
     try {
@@ -59,6 +72,12 @@ export default function Page() {
 
   useEffect(() => {
     if (selectedPage === "/dashboard/edu/progress-check") {
+      fetchProgressCheckData();
+    }
+  }, [selectedPage]);
+
+  useEffect(() => {
+    if (selectedPage === "/dashboard/edu/checkup") {
       fetchProgressCheckData();
     }
   }, [selectedPage]);
