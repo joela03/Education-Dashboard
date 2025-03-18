@@ -37,8 +37,10 @@ def get_progress_check():
                 FROM student_information as si
                 LEFT JOIN student_education_stats AS ses on si.student_id = ses.student_id
                 LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
-                WHERE ses.skills_mastered_percent > 45
-                OR ses.last_assessment < CURRENT_DATE - INTERVAL '3 months'
+                WHERE (ses.last_assessment < CURRENT_DATE - INTERVAL '3 months'
+                AND ses.last_progress_check < CURRENT_DATE - INTERVAL '3 months')
+                OR (ses.skills_mastered_percent > 45
+                AND ses.last_progress_check < CURRENT_DATE - INTERVAL '3 months')
                 ;""")
     
     data = curs.fetchall()
