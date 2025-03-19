@@ -3,16 +3,45 @@
 import dayjs from "dayjs";
 import React from "react";
 import { ColumnDef} from "@tanstack/react-table"
+import { Button } from "@/components/ui/button";
+import { MdArrowUpward, MdArrowDownward } from "react-icons/md";
 
 
 const parseDate = (date: string | Date) => {
   const parsedDate = new Date(date);
-  return parsedDate.toLocaleDateString('en-US', {
-    weekday: 'short',
+  return parsedDate.toLocaleDateString('en-UK', {
     day: 'numeric',
     year: 'numeric',
     month: 'short',
   });
+};
+
+const SortingHeader = ({
+  column,
+  label,
+}: {
+  column: any;
+  label: string;
+}) => {
+  const isSortedAsc = column.getIsSorted() === "asc";
+  const isSortedDesc = column.getIsSorted() === "desc";
+
+  return (
+    <Button
+      variant="ghost"
+      onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      aria-label={`Sort by ${label}`}
+    >
+      {label}
+      {isSortedAsc ? (
+        <MdArrowUpward className="ml-2 h-4 w-4" />
+      ) : isSortedDesc ? (
+        <MdArrowDownward className="ml-2 h-4 w-4" />
+      ) : (
+        <MdArrowUpward className="ml-2 h-4 w-4" />
+      )}
+    </Button>
+  );
 };
 
 
@@ -39,7 +68,7 @@ export type ProgressCheckData = {
   skills_mastered_percent: Float16Array
   last_assessment: Date
   last_progress_check: Date
-  months_since_last_attendance: Date
+  months_since_last_assessment: Date
 }
 
 export type PlanPaceData = {
@@ -51,6 +80,16 @@ export type PlanPaceData = {
   last_assessment: Date
   weeks_since_last_assessment: BigInteger
   expected_plan_percentage: string
+}
+
+export type CheckupData = {
+  name: string
+  mathnasium_id: string
+  student_link: string
+  enrolment_status: string
+  skills_mastered_percent: Float16Array
+  last_assessment: Date
+  months_since_last_assessment: BigInteger
 }
 
 export const attendanceColumns: ColumnDef<AttendanceData>[] = [
@@ -74,11 +113,12 @@ export const attendanceColumns: ColumnDef<AttendanceData>[] = [
   },
   {
     accessorKey: "attendance_count",
-    header: "Attendance Count",
+    header: ({ column }) => <SortingHeader column={column} label="ATTENDANCE COUNT" />,
   },
   {
     accessorKey: "last_attendance",
-    header: "Last Attendance",
+    header: ({ column }) => <SortingHeader column={column} label="LAST ATTENDANCE" />,
+    accessorFn: (row) => new Date(row.last_attendance),
     cell: ({ row }) => {
       const lastAttendanceDate = row.original.last_attendance;
       return <span>{parseDate(lastAttendanceDate)}</span>;
@@ -87,6 +127,11 @@ export const attendanceColumns: ColumnDef<AttendanceData>[] = [
   {
     accessorKey: "enrolment_status",
     header: "Enrolment Status",
+    // You can also customize the cell rendering if needed
+    cell: ({ row }) => {
+      const enrolmentStatus = row.original.enrolment_status;
+      return <span>{enrolmentStatus}</span>;
+    },
   },
   {
     accessorKey: "account_name",
@@ -125,7 +170,61 @@ export const progressCheckColumns: ColumnDef<ProgressCheckData>[] = [
   },
   {
     accessorKey: "skills_mastered_percent",
-    header: "Skills Mastered Percent",
+    header: ({ column }) => <SortingHeader column={column} label="SKILLS MASTERED PERCENT" />,
+  },
+  {
+    accessorKey: "last_assessment",
+    header: ({ column }) => <SortingHeader column={column} label="LAST ASSESSMENT" />,
+    accessorFn: (row) => new Date(row.last_assessment),
+    cell: ({ row }) => {
+      const lastAssessment = row.original.last_assessment;
+      return <span>{parseDate(lastAssessment)}</span>;
+    }
+  },
+  {
+    accessorKey: "months_since_last_assessment",
+    header: ({ column }) => <SortingHeader column={column} label="MONTHS SINCE LAST ASSESSMENT" />,
+    accessorFn: (row) => timeSinceDate(row.last_assessment, "month"),
+    cell: ({ row }) => {
+      const lastAssessment = row.original.last_assessment;
+      const monthsSinceLastAssessment = timeSinceDate(lastAssessment, "month");
+
+      return <span>{monthsSinceLastAssessment.toFixed(1)}</span>; 
+    }
+  },
+  {
+    accessorKey: "last_progress_check",
+    header: ({ column }) => <SortingHeader column={column} label="LAST PROGRESS CHECK" />,
+    accessorFn: (row) => new Date(row.last_progress_check),
+    cell: ({ row }) => {
+      const lastProgressCheck = row.original.last_progress_check;
+      return <span>{parseDate(lastProgressCheck)}</span>;
+    }
+  },
+];
+
+export const checkupColumns: ColumnDef<CheckupData>[] = [
+  {
+    accessorKey: "name",
+    header: "Student Name",
+    cell: ({ row }) => {
+        const name = row.original.name;
+        const studentLink = row.original.student_link;
+    
+        return (
+            <a href={studentLink} className="text-blue-500 hover:underline" target="_blank" rel="noopener noreferrer">
+                {name}
+            </a>
+        );
+    },
+  },
+  {
+    accessorKey: "mathnasium_id",
+    header: "Mathnasium ID",
+  },
+  {
+    accessorKey: "skills_mastered_percent",
+    header: ({ column }) => <SortingHeader column={column} label="SKILLS MASTERED PERCENT" />,
   },
   {
     accessorKey: "last_assessment",
@@ -136,19 +235,11 @@ export const progressCheckColumns: ColumnDef<ProgressCheckData>[] = [
     }
   },
   {
-    accessorKey: "last_progress_check",
-    header: "Last Progress Check",
+    accessorKey: "months_since_assessment",
+    header: "Months Since Last Assessment",
     cell: ({ row }) => {
-      const lastProgressCheck = row.original.last_progress_check;
-      return <span>{parseDate(lastProgressCheck)}</span>;
-    }
-  },
-  {
-    accessorKey: "months_since_last_progress_check",
-    header: "Months SinceLast Progress Check",
-    cell: ({ row }) => {
-      const lastProgressCheck = row.original.last_progress_check;
-      return <span>{timeSinceDate(lastProgressCheck, "month")}</span>;
+      const lastAssessment = row.original.last_assessment;
+      return <span>{timeSinceDate(lastAssessment, "month").toFixed(1)}</span>;
     }
   },
 ];
@@ -174,30 +265,35 @@ export const planPaceColumns: ColumnDef<PlanPaceData>[] = [
   },
   {
     accessorKey: "skills_mastered_percent",
-    header: "Skills Mastered Percent",
+    header: ({ column }) => <SortingHeader column={column} label="SKILLS MASTERED PERCENT" />,
+  },
+  {
+    accessorKey: "expected_plan_percentage",
+    header: ({ column }) => <SortingHeader column={column} label="EXPECTED PLAN PERCENT" />,
+    accessorFn: (row) => timeSinceDate(row.last_assessment, "week"),
+    cell: ({ row }) => {
+      const lastAssessment = row.original.last_assessment;
+      return <span>{(timeSinceDate(lastAssessment, "week")*4).toFixed(1)}</span>;
+    }
   },
   {
     accessorKey: "last_assessment",
-    header: "Last Assessment",
+    header: ({ column }) => <SortingHeader column={column} label="LAST ASSESSMENT" />,
+    accessorFn: (row) => new Date(row.last_assessment),
     cell: ({ row }) => {
       const lastAssessment = row.original.last_assessment;
       return <span>{parseDate(lastAssessment)}</span>;
     }
   },
   {
-    accessorKey: "weeks_since_last_progress_check",
-    header: "Weeks Since Last Assessment",
+    accessorKey: "months_since_last_assessment",
+    header: ({ column }) => <SortingHeader column={column} label="MONTHS SINCE LAST ASSESSMENT" />,
+    accessorFn: (row) => timeSinceDate(row.last_assessment, "month"),
     cell: ({ row }) => {
-      const lastProgressCheck = row.original.last_assessment;
-      return <span>{timeSinceDate(lastProgressCheck, "week")}</span>;
-    }
-  },
-  {
-    accessorKey: "expected_plan_percentage",
-    header: "Expected Plan Percentage",
-    cell: ({ row }) => {
-      const lastProgressCheck = row.original.last_assessment;
-      return <span>{timeSinceDate(lastProgressCheck, "week")*4}</span>;
+      const lastAssessment = row.original.last_assessment;
+      const monthsSinceLastAssessment = timeSinceDate(lastAssessment, "month");
+
+      return <span>{monthsSinceLastAssessment.toFixed(1)}</span>; 
     }
   },
 ];
