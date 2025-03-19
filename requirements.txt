@@ -5,6 +5,5 @@ pandas
 pytest
 psycopg2
 pylint
-ast
 flask
 flask-cors

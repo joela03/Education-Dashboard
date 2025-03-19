@@ -63,7 +63,7 @@ export default function Page() {
               <BreadcrumbItem className="hidden md:block">
                 <BreadcrumbLink href="#" 
                 className="px-4 py-3 text-center text-lg font-bold text-light-red-700 uppercase tracking-wider">
-                  Mathnsium Dashboard
+                  Mathnasium Dashboard
                 </BreadcrumbLink>
               </BreadcrumbItem>
             </BreadcrumbList>

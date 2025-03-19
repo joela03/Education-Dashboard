@@ -127,6 +127,11 @@ export const attendanceColumns: ColumnDef<AttendanceData>[] = [
   {
     accessorKey: "enrolment_status",
     header: "Enrolment Status",
+    // You can also customize the cell rendering if needed
+    cell: ({ row }) => {
+      const enrolmentStatus = row.original.enrolment_status;
+      return <span>{enrolmentStatus}</span>;
+    },
   },
   {
     accessorKey: "account_name",
