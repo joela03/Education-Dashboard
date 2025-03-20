@@ -2,8 +2,12 @@
 
 from database_functions import (get_student_attendance, get_progress_check, get_checkup_data,
                                 get_plan_pace)
+from imports import verify_password
 from flask import Flask, jsonify
 from flask_cors import CORS
+from pydantic import BaseModel
+import jwt
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -12,6 +16,31 @@ CORS(app)
 def endpoint_index():
     """Sets up index route"""
     return jsonify({"message": "Welcome to the Mathnasium API"})
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+
+    if not data or "username" not in data or "password" not in data:
+        return jsonify({"error": "Missing username or password"}), 400
+
+    user = database.get(data["username"])
+    
+    if not user or not verify_password(user["salt"], user["password_hash"], data["password"]):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    payload = {
+        "sub": data["username"],
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+    }
+    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
+
+    return jsonify({"access_token": token, "token_type": "bearer"})
+        
 
 @app.route("/attendance", methods=["GET"])
 def endpoint_get_attendance():
