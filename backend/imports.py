@@ -181,3 +181,12 @@ def hash_password(password: str) -> tuple:
     
     return salt.hex(), hash_bytes.hex()
 
+def insert_user(username: str, password: str, conn):
+    salt, password_hash = hash_password(password)
+    
+    with conn.cursor() as cur:
+        cur.executes(
+            """INSERT INTO users (username, password_hash, salt)
+            VALUES (%s, %s, %s) """
+        )
+        conn.commit()
