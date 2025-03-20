@@ -59,8 +59,9 @@ const data = {
 
 export function AppSidebar({
   onSelectPage,
+    selectedPage,
   ...props
-}: React.ComponentProps<typeof Sidebar> & { onSelectPage: (page: string) => void }) {
+}: React.ComponentProps<typeof Sidebar> & { onSelectPage: (page: string) => void; selectedPage: string }) {
   return (
     <Sidebar {...props} className="rounded-lg border border-gray-200 shadow-lg">
       <SidebarContent className="py-4">
@@ -71,21 +72,27 @@ export function AppSidebar({
             </SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {item.items.map((subItem) => (
-                  <SidebarMenuItem key={subItem.title}>
-                    <SidebarMenuButton asChild>
-                      <a
-                        href={subItem.url}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          onSelectPage(subItem.url)
-                        }}
-                        className="block py-2 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
-                        {subItem.title}
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {item.items.map((subItem) => {
+                  const isActive = selectedPage === subItem.url
+                  return (
+                    <SidebarMenuItem key={subItem.title}>
+                      <SidebarMenuButton asChild>
+                        <a
+                          href={subItem.url}
+                          onClick={(e) => {
+                            e.preventDefault()
+                            onSelectPage(subItem.url)
+                          }}
+                          className={`block py-2 rounded-md text-sm font-medium transition-colors ${
+                            isActive ? "bg-red-500 text-white" : "text-gray-700 hover:bg-gray-100"
+                          }`}
+                        >
+                          {subItem.title}
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )
+                })}
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

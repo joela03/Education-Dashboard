@@ -54,7 +54,7 @@ export default function Page() {
 
   return (   
     <SidebarProvider>
-      <AppSidebar onSelectPage={setSelectedPage} />
+      <AppSidebar onSelectPage={setSelectedPage} selectedPage={selectedPage} />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 bg-black text-white px-4">
           <SidebarTrigger className="-ml-1" />
@@ -68,7 +68,7 @@ export default function Page() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-      </header>
+        </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           {selectedPage === "/dashboard/risk/attendance" ? (
             loading ? (
