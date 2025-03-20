@@ -187,6 +187,6 @@ def insert_user(username: str, password: str, conn):
     with conn.cursor() as cur:
         cur.executes(
             """INSERT INTO users (username, password_hash, salt)
-            VALUES (%s, %s, %s) """
+            VALUES (%s, %s, %s)""", (username, password_hash, salt)
         )
         conn.commit()
