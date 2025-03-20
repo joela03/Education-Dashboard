@@ -1,5 +1,6 @@
 """Function's that load pandas df to mathnasium database"""
 import os
+import hashlib
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
@@ -171,3 +172,12 @@ def import_students_to_database(conn, df):
                 ON CONFLICT (student_id, guardian_id) DO NOTHING;
             """, (student_id, guardian_id))
             conn.commit()
+            
+def hash_password(password: str) -> tuple:
+    """Hashes password with a salt"""
+    salt = os.urandom(16)
+    hash_bytes = hashlib.pbkdf2_hmac('sha256', password.encode(),
+                                    salt, 100000)
+    
+    return salt.hex(), hash_bytes.hex()
+
