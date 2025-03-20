@@ -181,6 +181,13 @@ def hash_password(password: str) -> tuple:
     
     return salt.hex(), hash_bytes.hex()
 
+def verify_password(stored_salt: str, stored_hash: str, password: str) -> bool:
+    """Verifies submitted password"""
+    
+    salt = bytes.fromhex(stored_salt)
+    hash_bytes = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 100000)
+    return stored_hash == hash_bytes.hex()
+
 def insert_user(username: str, password: str, conn):
     salt, password_hash = hash_password(password)
     
