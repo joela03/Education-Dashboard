@@ -2,6 +2,22 @@
 
 from imports import (get_cursor, get_db_connection)
 
+
+def get_username_data(username: str):
+    "Queries db for relevant student data"
+
+    conn = get_db_connection()
+    curs = get_cursor(conn)
+
+    curs.execute("""SELECT password_hash, salt
+                FROM users
+                WHERE USERS LIKE (%s)""", (username))
+    data = curs.fetchall
+    curs.close()
+    conn.close()
+
+    return data
+
 def get_student_attendance():
     """Queries the database for students that haven't attended"""
 
