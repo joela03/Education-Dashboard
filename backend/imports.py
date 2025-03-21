@@ -191,9 +191,16 @@ def verify_password(stored_salt: str, stored_hash: str, password: str) -> bool:
 def insert_user(username: str, password: str, conn):
     salt, password_hash = hash_password(password)
     
-    with conn.cursor() as cur:
-        cur.executes(
-            """INSERT INTO users (username, password_hash, salt)
-            VALUES (%s, %s, %s)""", (username, password_hash, salt)
-        )
-        conn.commit()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """INSERT INTO users (username, password_hash, salt)
+                VALUES (%s, %s, %s)""", (username, password_hash, salt)
+            )
+            conn.commit()
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        conn.rollback()
+    finally:
+        if conn:
+            conn.close()
