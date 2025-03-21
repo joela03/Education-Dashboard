@@ -9,7 +9,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from pydantic import BaseModel
 import jwt
-from datetime import datetime
+from datetime import datetime, timedelta
 
 load_dotenv()
 JWT_KEY = os.getenv("JWT_KEY")
@@ -39,16 +39,22 @@ def login():
         username = data.get("username")
         
         try:
-            user = get_username_data(username)
+            user_dict = get_username_data(username)
+            for item in user_dict:
+                try:
+                    salt = item.get("salt")
+                    password_hash = item.get("password_hash")
+                except Exception as e:
+                    return jsonify({"error": "Error retreiving from database"})
         except Exception as e:
             return jsonify({"error": "Error retrieving user data", "details": str(e)}), 500
         
-        if not user or not verify_password(user.get("salt"), user.get("password_hash"), data.get("password")):
+        if not user_dict or not verify_password(salt, password_hash, data.get("password")):
             return jsonify({"error": "Invalid credentials"}), 401
         
         payload = {
             "sub": username,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+            "exp": datetime.utcnow()+ timedelta(hours=1)
         }
         token = jwt.encode(payload, JWT_KEY, algorithm="HS256")
 
