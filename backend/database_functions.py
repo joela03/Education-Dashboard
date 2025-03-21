@@ -9,10 +9,10 @@ def get_username_data(username: str):
     conn = get_db_connection()
     curs = get_cursor(conn)
 
-    curs.execute("""SELECT password_hash, salt
+    curs.execute("""SELECT salt, password_hash
                 FROM users
-                WHERE USERS LIKE (%s)""", (username))
-    data = curs.fetchall
+                WHERE username = (%s)""", (username,))
+    data = curs.fetchall()
     curs.close()
     conn.close()
 
