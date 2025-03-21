@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DataTable } from "@/components/data-table"
+import { useRouter } from "next/navigation";
 import { attendanceColumns, AttendanceData, progressCheckColumns,
         ProgressCheckData,planPaceColumns, PlanPaceData,
         checkupColumns, CheckupData } from "@/configs/tableConfigs"
@@ -19,6 +20,8 @@ import {
 } from "@/components/ui/sidebar"
 
 export default function Page() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const router = useRouter()
   const [selectedPage, setSelectedPage] = useState("default")
   const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([])
   const [PlanPaceData, setPlanPaceData] = useState<PlanPaceData[]>([])
@@ -40,6 +43,17 @@ export default function Page() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+    } else {
+      setIsAuthenticated(true)
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
     const lastSegment = selectedPage.split("/").pop();
     if (lastSegment === "attendance") {
       fetchAPIData(lastSegment, setAttendanceData);
@@ -51,6 +65,10 @@ export default function Page() {
       fetchAPIData(lastSegment, setCheckupData);
     }
   }, [selectedPage]);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (   
     <SidebarProvider>
