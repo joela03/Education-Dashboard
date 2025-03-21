@@ -179,7 +179,7 @@ def hash_password(password: str) -> tuple:
     hash_bytes = hashlib.pbkdf2_hmac('sha256', password.encode(),
                                     salt, 100000)
     
-    return salt.hex(), hash_bytes.hex()
+    return {"salt": salt.hex(), "password_hash": hash_bytes.hex()}
 
 def verify_password(stored_salt: str, stored_hash: str, password: str) -> bool:
     """Verifies submitted password"""
