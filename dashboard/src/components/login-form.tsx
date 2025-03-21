@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import {useState} from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 async function login(username: string, password: string) {
   try {
@@ -51,41 +51,55 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   }
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
-          <CardDescription>Enter your username</CardDescription>
+    <div className={cn("flex justify-center items-center min-h-screen ", className)} {...props}>
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader className="text-center">
+          <CardTitle className="text-2xl font-bold text-gray-800">Mathnasium Dashboard</CardTitle>
+          <CardDescription className="text-gray-600">
+            Enter Credentials
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="username" className="text-gray-700">
+                  Username
+                </Label>
                 <Input
                   id="username"
                   type="text"
-                  placeholder="user123"
+                  placeholder="Enter your username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
+                  className="focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div className="grid gap-3">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password" className="text-gray-700">
+                    Password
+                  </Label>
                 </div>
                 <Input
                   id="password"
                   type="password"
+                  placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  className="focus:ring-2 focus:ring-blue-500"
                 />
               </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
+              {error && (
+                <p className="text-red-500 text-sm text-center">{error}</p>
+              )}
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full">
+                <Button
+                  type="submit"
+                  className="w-full bg-red-500 hover:bg-red-700 text-white font-semibold py-2 rounded-md transition duration-200"
+                >
                   Login
                 </Button>
               </div>
