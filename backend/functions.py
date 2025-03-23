@@ -9,6 +9,9 @@ from pandas import isna
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 from dotenv import load_dotenv
 
@@ -69,6 +72,13 @@ def select_reports(driver, enrolmentdropdownvalue):
 
     time.sleep(5)
 
+def select_assessment_report(driver):
+    """Selects correct filters for the assessment report"""
+
+    driver.get("https://radius.mathnasium.com/AssessmentReport")
+
+    interact_with_k_dropdown(driver, "groupedDropDownList", 2)
+    select_dropdown_by_input(driver, 'enrollmentStatusMulti_taglist', "On Hold")
 
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
@@ -269,3 +279,24 @@ def ensure_list(value):
             return value.split(', ')
 
     return []
+
+def select_dropdown_by_input(driver, input_id: str, target_value: str):
+    """Enters a dropdown input."""
+    
+    # Identify input field
+    input_xpath = f"//input[@aria-describedby='{input_id}']"
+    input_field = driver.find_element(By.XPATH, input_xpath)
+    
+    input_field.click()
+    input_field.clear()
+
+    # Input the target value
+    input_field.send_keys(target_value)
+    time.sleep(1)
+
+    # Simulate DOWN arrow key to navigate options
+    input_field.send_keys(Keys.DOWN)
+    time.sleep(0.5)
+
+    # Simulate pressing ENTER to select the option
+    input_field.send_keys(Keys.ENTER)
