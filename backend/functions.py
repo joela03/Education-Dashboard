@@ -81,8 +81,8 @@ def select_assessment_report(driver):
     select_dropdown_by_input(driver, 'enrollmentStatusMulti_taglist', "On Hold")
     select_dropdown_by_input(driver, "assessmentOptionMulti_taglist", "Mathnasium")
     
-    for centre in ["Wimbledon UK", "Wimbledon @home VC"]:
-        select_dropdown_by_input(driver, "AllCenterMultiSelect", centre)
+    for centre in ["Wimbledon UK", "Wimbledon@home (VC)"]:
+        select_dropdown_by_input(driver, "AllCenterListMultiSelect_taglist", centre)
 
 
 def subtracted_date(date, days: int):
