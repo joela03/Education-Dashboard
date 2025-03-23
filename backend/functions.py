@@ -97,6 +97,21 @@ def select_assessment_report(driver):
 
     select_report_count(driver, "gridStudentReport", 3)
 
+def select_enrolment_report(driver, enrolment_dropdown_value:int ):
+    """Selects correct filters for the assessment report"""
+
+    driver.get("https://radius.mathnasium.com/Enrollment/EnrollmentReport")
+
+    for centre in ["Wimbledon UK", "Wimbledon@home (VC)"]:
+        select_dropdown_by_input(driver, "AllCenterListMultiSelect_taglist", centre)
+
+    interact_with_k_dropdown(driver, "EnrollmentStatusDropDown", enrolment_dropdown_value)
+    
+    for centre in ["Wimbledon UK", "Wimbledon@home (VC)"]:
+        select_dropdown_by_input(driver, "AllCenterListMultiSelect_taglist", centre)
+
+    select_report_count(driver, "gridStudentReport", 3)
+
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
 
