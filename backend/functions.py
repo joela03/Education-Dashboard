@@ -84,6 +84,13 @@ def select_assessment_report(driver):
     for centre in ["Wimbledon UK", "Wimbledon@home (VC)"]:
         select_dropdown_by_input(driver, "AllCenterListMultiSelect_taglist", centre)
 
+    # Extracts current date
+    current_date = datetime.now()
+    current_date_str = dt_to_string(current_date)
+
+    # Subtracts 60 weeks from current date
+    str_start_date = subtracted_date(current_date_str, 230)
+    input_date(driver, str_start_date, 'ReportStart')
 
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
@@ -129,6 +136,8 @@ def input_date(driver, date: str, element_id: str):
 
     #Splits date into an array
     split_reversed_date = date.split("/")
+
+    print([i for i in split_reversed_date])
 
     # Sends date with Left Arrow key after every input
     element = driver.find_element(By.ID, element_id)
