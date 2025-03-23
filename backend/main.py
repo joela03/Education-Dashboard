@@ -32,6 +32,14 @@ if __name__ == "__main__":
         select_assessment_report(driver)
         assessments_df = scrape_table(driver, "gridAssessmentReport", 0)
 
+        # Joins first name and last name of students
+        assessments_df['Student First Name'] = assessments_df.apply(lambda row: row['Student First Name'] +
+                                                        ' ' + row['Student Last Name'], axis=1)
+
+        # Drop useless columns
+        assessments_df = assessments_df.drop(['Signup Date','Virtual Center'], axis=1)
+        assessments_df.to_csv('assessments.csv', index=False) 
+
         # Scrape enrolment reports
         select_enrolment_report(driver, 3)
         enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0)
