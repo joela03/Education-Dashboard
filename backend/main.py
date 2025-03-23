@@ -19,31 +19,38 @@ if __name__ == "__main__":
         credential_list = get_credentials_from_env()
         enter_credentials_to_website(driver, credential_list)
 
-        # # Scrape enrolment reports
+        # Scrape student report
         select_reports(driver, 3)
         student_df = scrape_table(driver, "gridStudentReport", 0)
 
-        # Scrape hold reports
+        # Scrape student who are on hold
         interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 4)
-        click(driver, "btnsearch")
-        
-        time.sleep(10)
+        click(driver, "btnsearch")       
         student_hold_df = scrape_table(driver, "gridStudentReport", 0)
-
+        
+        # Scrape assessment report
         select_assessment_report(driver)
         assessments_df = scrape_table(driver, "gridAssessmentReport", 0)
 
-        select_enrolment_report(driver, 0)
+        # Scrape enrolment reports
+        select_enrolment_report(driver, 3)
         enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0)
 
-        select_enrolment_report(driver, 1)
+        select_enrolment_report(driver, 4)
         enrolment_hold_df = scrape_table(driver, "gridEnrollmentReport", 0)
 
         select_enrolment_report(driver, 2)
         pre_enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0)
-
+        
+        # Merge enrolment reports
         hold_enrolment_df = merge_df(enrolment_df, enrolment_hold_df)
         joined_enrolment_df = merge_df(hold_enrolment_df, pre_enrolment_df)
+        enrolment_df.to_csv('enrolment.csv', index=False) 
+
+        # Scrape hold table
+        select_hold_report(driver)
+        hold_df = scrape_table(driver, "gridHoldsReport", 0)
+        hold_df.to_csv('hold.csv', index=False) 
 
         # Combine both dataframes
         joined_df = merge_df(student_df, student_hold_df)
