@@ -112,6 +112,12 @@ def select_enrolment_report(driver, enrolment_dropdown_value:int ):
 
     select_report_count(driver, "gridStudentReport", 3)
 
+def select_hold_report(driver):
+    """Selects reports for accounts on hold"""
+
+    driver.get("https://radius.mathnasium.com/Holds/HoldsReport")
+    select_report_count(driver, "gridStudentReport", 3)
+
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
 
