@@ -92,6 +92,9 @@ def select_assessment_report(driver):
     str_start_date = subtracted_date(current_date_str, 230)
     input_date(driver, str_start_date, 'ReportStart')
 
+    checkbox = driver.find_element(By.ID, "noPostAssessmentCheck")
+    checkbox.click()
+
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
 
