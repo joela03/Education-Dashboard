@@ -79,6 +79,11 @@ def select_assessment_report(driver):
 
     interact_with_k_dropdown(driver, "groupedDropDownList", 2)
     select_dropdown_by_input(driver, 'enrollmentStatusMulti_taglist', "On Hold")
+    select_dropdown_by_input(driver, "assessmentOptionMulti_taglist", "Mathnasium")
+    
+    for centre in ["Wimbledon UK", "Wimbledon @home VC"]:
+        select_dropdown_by_input(driver, "AllCenterMultiSelect", centre)
+
 
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
