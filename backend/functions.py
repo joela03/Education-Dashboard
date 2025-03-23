@@ -68,7 +68,7 @@ def select_reports(driver, enrolmentdropdownvalue):
     input_date(driver, str_start_date, "StudentReportStart")
 
     # Selects items per page to be 1000
-    select_report_count(driver, "gridStudentReport", 3)
+    select_report_count(driver, "gridAssessmentReport", 3)
 
     time.sleep(5)
 
@@ -95,8 +95,7 @@ def select_assessment_report(driver):
     checkbox = driver.find_element(By.ID, "noPostAssessmentCheck")
     checkbox.click()
 
-    search_btn = driver.find_element(By.ID, "btnsearch")
-    search_btn.click()
+    select_report_count(driver, "gridStudentReport", 3)
 
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
