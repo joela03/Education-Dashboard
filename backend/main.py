@@ -8,7 +8,8 @@ from webdriver_manager.chrome import ChromeDriverManager
 from functions import (get_credentials_from_env, enter_credentials_to_website,
                        select_reports, scrape_table,convert_col_to_dt,
                        click, interact_with_k_dropdown, merge_df,
-                       select_progress_report_batch, add_mathnasium_id_column)
+                       select_progress_report_batch, add_mathnasium_id_column,
+                       select_assessment_report, select_hold_report, select_enrolment_report)
 from imports import (get_db_connection, import_students_to_database)
 
 if __name__ == "__main__":
@@ -18,20 +19,34 @@ if __name__ == "__main__":
         credential_list = get_credentials_from_env()
         enter_credentials_to_website(driver, credential_list)
 
-
         # # Scrape enrolment reports
         select_reports(driver, 3)
-        enrolment_df = scrape_table(driver, "gridStudentReport", 0)
+        student_df = scrape_table(driver, "gridStudentReport", 0)
 
         # Scrape hold reports
         interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 4)
         click(driver, "btnsearch")
         
         time.sleep(10)
-        hold_df = scrape_table(driver, "gridStudentReport", 0)
+        student_hold_df = scrape_table(driver, "gridStudentReport", 0)
+
+        select_assessment_report(driver)
+        assessments_df = scrape_table(driver, "gridAssessmentReport", 0)
+
+        select_enrolment_report(driver, 0)
+        enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0)
+
+        select_enrolment_report(driver, 1)
+        enrolment_hold_df = scrape_table(driver, "gridEnrollmentReport", 0)
+
+        select_enrolment_report(driver, 2)
+        pre_enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0)
+
+        hold_enrolment_df = merge_df(enrolment_df, enrolment_hold_df)
+        joined_enrolment_df = merge_df(hold_enrolment_df, pre_enrolment_df)
 
         # Combine both dataframes
-        joined_df = merge_df(enrolment_df, hold_df)
+        joined_df = merge_df(student_df, student_hold_df)
 
         # Converting column with date values into date objects
         joined_df = convert_col_to_dt(joined_df, ["Last\nProgress Check", "Last\nAssessment",
