@@ -68,7 +68,7 @@ def select_reports(driver, enrolmentdropdownvalue):
     input_date(driver, str_start_date, "StudentReportStart")
 
     # Selects items per page to be 1000
-    select_report_count(driver, "gridAssessmentReport", 3)
+    select_report_count(driver, "gridStudentReport", 3)
 
     time.sleep(5)
 
@@ -95,7 +95,7 @@ def select_assessment_report(driver):
     checkbox = driver.find_element(By.ID, "noPostAssessmentCheck")
     checkbox.click()
 
-    select_report_count(driver, "gridStudentReport", 3)
+    select_report_count(driver, "gridAssessmentReport", 3)
 
 def select_enrolment_report(driver, enrolment_dropdown_value:int ):
     """Selects correct filters for the assessment report"""
@@ -106,17 +106,14 @@ def select_enrolment_report(driver, enrolment_dropdown_value:int ):
         select_dropdown_by_input(driver, "AllCenterListMultiSelect_taglist", centre)
 
     interact_with_k_dropdown(driver, "EnrollmentStatusDropDown", enrolment_dropdown_value)
-    
-    for centre in ["Wimbledon UK", "Wimbledon@home (VC)"]:
-        select_dropdown_by_input(driver, "AllCenterListMultiSelect_taglist", centre)
 
-    select_report_count(driver, "gridStudentReport", 3)
+    select_report_count(driver, "gridEnrollmentReport", 3)
 
 def select_hold_report(driver):
     """Selects reports for accounts on hold"""
 
     driver.get("https://radius.mathnasium.com/Holds/HoldsReport")
-    select_report_count(driver, "gridStudentReport", 3)
+    select_report_count(driver, "gridHoldsReport", 3)
 
 def subtracted_date(date, days: int):
     """Subtracts a given number of days from a date and returns date as a string"""
@@ -162,8 +159,6 @@ def input_date(driver, date: str, element_id: str):
 
     #Splits date into an array
     split_reversed_date = date.split("/")
-
-    print([i for i in split_reversed_date])
 
     # Sends date with Left Arrow key after every input
     element = driver.find_element(By.ID, element_id)
