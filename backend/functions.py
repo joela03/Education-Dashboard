@@ -168,7 +168,7 @@ def input_date(driver, date: str, element_id: str):
                       split_reversed_date[1], Keys.ARROW_LEFT,
                       split_reversed_date[0])
 
-def scrape_table(driver, table_id: str, progress_report: bool):
+def scrape_table(driver, table_id: str, progress_report: bool, enrolment_report: bool):
     "Scrapes content from the page and adds it to a pandas df"
 
     time.sleep(5)
@@ -210,6 +210,12 @@ def scrape_table(driver, table_id: str, progress_report: bool):
                 links_in_third_col = cells[2].find_elements(By.TAG_NAME, 'a')
                 if len(links_in_third_col) > 1:
                     row_data[1] = links_in_third_col[1].get_attribute("href")
+
+            # If enrolment_report, extract the <a> tag 
+            if enrolment_report and len(cells) > 3:
+                links_in_fourth_col = cells[3].find_elements(By.TAG_NAME, 'a')
+                if links_in_fourth_col:
+                    row_data[1] = links_in_fourth_col[0].get_attribute("href")
 
             # Append the remaining columns as text
             row_data.extend([cell.text.strip() for cell in cells[1:]])
