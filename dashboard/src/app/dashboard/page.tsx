@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { attendanceColumns, AttendanceData, progressCheckColumns,
         ProgressCheckData,planPaceColumns, PlanPaceData,
         checkupColumns, CheckupData } from "@/configs/tableConfigs"
+import { Card, CardHeader, CardBody } from '@components/ui/card';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -88,35 +89,45 @@ export default function Page() {
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          {selectedPage === "/dashboard/risk/attendance" ? (
+          
+          {selectedPage === "/dashboard/risk/general" ? (
+            <div>
+              {/* Add Shadcn Cards for the general route */}
+              <Card>
+                <CardHeader>
+                  <h2>General Risk Information</h2>
+                </CardHeader>
+                <CardBody>
+                  <p>Content for the General Risk section</p>
+                  {/* Additional content */}
+                </CardBody>
+              </Card>
+            </div>
+          ) : selectedPage === "/dashboard/risk/attendance" ? (
             loading ? (
               <p>Loading Attendance data...</p>
             ) : (
               <DataTable columns={attendanceColumns} data={attendanceData} />
             )
-          ) :         
-            selectedPage === "/dashboard/edu/progress_check" ? (
+          ) : selectedPage === "/dashboard/edu/progress_check" ? (
             loading ? (
               <p>Loading Progress Check data...</p>
             ) : (
               <DataTable columns={progressCheckColumns} data={progressCheckData} />
             )
-          ) : 
-            selectedPage === "/dashboard/edu/planpace" ? (
+          ) : selectedPage === "/dashboard/edu/planpace" ? (
             loading ? (
-                <p>Loading Plan Pace data...</p>
+              <p>Loading Plan Pace data...</p>
             ) : (
               <DataTable columns={planPaceColumns} data={PlanPaceData} />
             )
-          ) :
-            selectedPage === "/dashboard/edu/checkup" ? (
+          ) : selectedPage === "/dashboard/edu/checkup" ? (
             loading ? (
-                <p>Loading Checkup data...</p>
+              <p>Loading Checkup data...</p>
             ) : (
               <DataTable columns={checkupColumns} data={CheckupData} />
             )
-          ) :
-          (
+          ) : (
             <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
               Select a section from the sidebar
             </div>
@@ -124,5 +135,5 @@ export default function Page() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
