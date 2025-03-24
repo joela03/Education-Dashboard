@@ -9,7 +9,8 @@ from functions import (get_credentials_from_env, enter_credentials_to_website,
                        select_reports, scrape_table,convert_col_to_dt,
                        click, interact_with_k_dropdown, merge_df,
                        select_progress_report_batch, add_mathnasium_id_column,
-                       select_assessment_report, select_hold_report, select_enrolment_report)
+                       select_assessment_report, select_hold_report, select_enrolment_report,
+                       check_for_popup, get_hold_dates)
 from imports import (get_db_connection, import_students_to_database)
 
 if __name__ == "__main__":
@@ -18,6 +19,8 @@ if __name__ == "__main__":
     try:
         credential_list = get_credentials_from_env()
         enter_credentials_to_website(driver, credential_list)
+        
+        check_for_popup(driver)
 
         # Scrape student report
         select_reports(driver, 3)
@@ -62,6 +65,7 @@ if __name__ == "__main__":
         select_hold_report(driver)
         hold_df = scrape_table(driver, "gridHoldsReport", 0)
         hold_df.columns = [clean_whitespace(col) for col in hold_df.columns]
+        hold_df[['Hold start date', 'Hold end date']] = pd.DataFrame(hold_df['Holds'].apply(get_hold_dates).to_list(), index=hold_df.index)
         hold_df.to_csv('hold.csv', index=False) 
 
         # Combine both dataframes
