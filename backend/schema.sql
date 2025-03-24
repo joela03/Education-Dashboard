@@ -32,6 +32,22 @@ CREATE TABLE "student_accounts" (
     FOREIGN KEY ("account_id") REFERENCES "accounts"("account_id") ON DELETE RESTRICT
 );
 
+CREATE TABLE "assessments" (
+    "assessment_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "date_taken" DATE NOT NULL,
+    "assessment_title" VARCHAR (255) NOT NULL,
+    "assessment_level" BIGINT NOT NULL,
+    "score" BIGINT NOT NULL
+)
+
+CREATE TABLE assessments_students(
+    "assessment_id" BIGINT NOT NULL,
+    "student_id" BIGINT NOT NULL,
+    PRIMARY KEY ("student_id", "assessment_id"),
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
+    FOREIGN KEY ("assessment_id") REFERENCES "assessments"("assessment_id") ON DELETE RESTRICT
+)
+
 CREATE TABLE "student_education_stats" (
     "student_id" BIGINT NOT NULL UNIQUE PRIMARY KEY,
     "delivery_id" BIGINT,
