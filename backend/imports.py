@@ -55,24 +55,24 @@ def import_students_to_database(conn, df):
     for _, row in df.iterrows():
         # Convert Enrolment Status and Delivery to keys
         enrolment_status = row.get('Enrolment Status', '').strip()
-        enrolment_id = get_status_key('enrolment', enrolment_status)
+        enrolment_key = get_status_key('enrolment', enrolment_status)
 
         delivery_type = row.get('Delivery', '').strip()
         delivery_id = get_status_key('delivery', delivery_type)
 
         # Insert into student_information table
         curs.execute("""
-            INSERT INTO student_information (name, mathnasium_id, student_link, enrolment_id, year)
+            INSERT INTO student_information (name, mathnasium_id, student_link, enrolment_key, year)
             VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (mathnasium_id) DO UPDATE 
             SET name = EXCLUDED.name,
                 student_link = EXCLUDED.student_link,
-                enrolment_id = EXCLUDED.enrolment_id,
+                enrolment_key = EXCLUDED.enrolment_key,
                 year = EXCLUDED.year
             RETURNING student_id;
         """, (row['Student'],
             row.get('Mathnasium ID'),
-            row['Student Link'], enrolment_id, 
+            row['Student Link'], enrolment_key, 
             0 if row['Year'] == "Reception" else (13 if row['Year'] == "College" else row['Year']),
             ))
         student_id = curs.fetchone().get('student_id')
