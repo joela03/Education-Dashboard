@@ -31,6 +31,8 @@ if __name__ == "__main__":
         # Scrape assessment report
         select_assessment_report(driver)
         assessments_df = scrape_table(driver, "gridAssessmentReport", 0)
+        clean_whitespace = lambda text: ' '.join(text.split())
+        assessments_df.columns = [clean_whitespace(col) for col in assessments_df.columns]
 
         # Joins first name and last name of students
         assessments_df['Student First Name'] = assessments_df.apply(lambda row: row['Student First Name'] +
@@ -53,11 +55,13 @@ if __name__ == "__main__":
         # Merge enrolment reports
         hold_enrolment_df = merge_df(enrolment_df, enrolment_hold_df)
         joined_enrolment_df = merge_df(hold_enrolment_df, pre_enrolment_df)
-        enrolment_df.to_csv('enrolment.csv', index=False) 
+        joined_enrolment_df.columns = [clean_whitespace(col) for col in joined_enrolment_df.columns]
+        joined_enrolment_df.to_csv('enrolment.csv', index=False) 
 
         # Scrape hold table
         select_hold_report(driver)
         hold_df = scrape_table(driver, "gridHoldsReport", 0)
+        hold_df.columns = [clean_whitespace(col) for col in hold_df.columns]
         hold_df.to_csv('hold.csv', index=False) 
 
         # Combine both dataframes
