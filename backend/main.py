@@ -40,6 +40,8 @@ if __name__ == "__main__":
         # Joins first name and last name of students
         assessments_df['Student First Name'] = assessments_df.apply(lambda row: row['Student First Name'] +
                                                         ' ' + row['Student Last Name'], axis=1)
+        assessments_df.rename(columns={"Student First Name": "Student",
+                        "Student First Name Link": "Student Link" }, inplace=True)
 
         # Drop useless columns
         assessments_df = assessments_df.drop(['Signup Date','Virtual Center'], axis=1)
