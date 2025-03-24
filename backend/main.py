@@ -65,7 +65,7 @@ if __name__ == "__main__":
         joined_enrolment_df['Student First Name'] = joined_enrolment_df.apply(lambda row: row['Student First Name'] +
                                                 ' ' + row['Student Last Name'], axis=1)
         joined_enrolment_df.rename(columns={"Student First Name": "Student",
-                "Student First Name Link": "Account Link" }, inplace=True)
+                "Student First Name Link": "Student Link" }, inplace=True)
         joined_enrolment_df.to_csv('enrolment.csv', index=False) 
 
         # Scrape hold table
@@ -96,7 +96,7 @@ if __name__ == "__main__":
 
         # Scrapes progress reports
         select_progress_report_batch(driver)
-        progress_df = scrape_table(driver, "gridCurrentBatch", 1)
+        progress_df = scrape_table(driver, "gridCurrentBatch", 1, 0)
         progress_df.rename(columns={"Student Link": "Account Link"}, inplace=True)
 
         # Merges the student report and progress report
