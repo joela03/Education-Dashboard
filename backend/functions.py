@@ -352,8 +352,8 @@ def check_for_popup(driver):
 def get_hold_end_date(holds: str) -> datetime:
     """Takes a string with two dates and returns last date which when the hold ends"""
     
-    split_dates = holds.split('').strip()
-    hold_end_string = split_dates[-1]
+    split_dates = holds.split(' - ')
+    hold_end_string = split_dates[-1].strip()
     hold_end_date = datetime.strptime(hold_end_string, "%d/%m/%Y")
     
     return hold_end_date
