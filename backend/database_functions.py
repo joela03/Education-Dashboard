@@ -31,7 +31,7 @@ def get_student_attendance():
                 LEFT JOIN student_accounts AS sa ON si.student_id = sa.student_id
                 LEFT JOIN accounts AS a ON sa.account_id = a.account_id
                 LEFT JOIN student_education_stats AS ses ON si.student_id = ses.student_id
-                LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
+                LEFT JOIN enrolment_status AS es ON si.enrolment_key = es.enrolment_key
                 WHERE ses.attendance_count < 5
                 OR ses.last_attendance < CURRENT_DATE - INTERVAL '7 days'
                 ;""")
@@ -52,7 +52,7 @@ def get_progress_check():
                 ses.skills_mastered_percent
                 FROM student_information as si
                 LEFT JOIN student_education_stats AS ses on si.student_id = ses.student_id
-                LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
+                LEFT JOIN enrolment_status AS es ON si.enrolment_key = es.enrolment_key
                 WHERE (ses.last_assessment < CURRENT_DATE - INTERVAL '3 months'
                 AND ses.last_progress_check < CURRENT_DATE - INTERVAL '3 months')
                 OR (ses.skills_mastered_percent > 45
@@ -75,7 +75,7 @@ def get_checkup_data():
                 si.student_link, ses.last_assessment, ses.skills_mastered_percent
                 FROM student_information as si
                 LEFT JOIN student_education_stats AS ses on si.student_id = ses.student_id
-                LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
+                LEFT JOIN enrolment_status AS es ON si.enrolment_key = es.enrolment_key
                 WHERE ses.skills_mastered_percent > 85
                 OR ses.last_assessment < CURRENT_DATE - INTERVAL '24 weeks'
                 ;""")
@@ -96,7 +96,7 @@ def get_plan_pace():
                 si.student_link, ses.last_assessment, ses.skills_mastered_percent
                 FROM student_information as si
                 LEFT JOIN student_education_stats AS ses on si.student_id = ses.student_id
-                LEFT JOIN enrolment_status AS es ON si.enrolment_id = es.enrolment_id
+                LEFT JOIN enrolment_status AS es ON si.enrolment_key = es.enrolment_key
                 WHERE (EXTRACT(DAY FROM (CURRENT_DATE::timestamp - ses.last_assessment::timestamp)) / 7) * 4 > ses.skills_mastered_percent
                 ;""")
     

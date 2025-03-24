@@ -1,5 +1,5 @@
 CREATE TABLE "enrolment_status" (
-    "enrolment_id" BIGINT NOT NULL PRIMARY KEY,
+    "enrolment_key" BIGINT NOT NULL PRIMARY KEY,
     "enrolment_status" VARCHAR(255) NOT NULL
 );
 
@@ -13,9 +13,9 @@ CREATE TABLE "student_information" (
     "name" VARCHAR(255) NOT NULL,
     "mathnasium_id" BIGINT UNIQUE NOT NULL,
     "student_link" VARCHAR(500),
-    "enrolment_id" BIGINT,
+    "enrolment_key" BIGINT,
     "year" BIGINT NOT NULL,
-    FOREIGN KEY ("enrolment_id") REFERENCES "enrolment_status"("enrolment_id") ON DELETE SET NULL
+    FOREIGN KEY ("enrolment_key") REFERENCES "enrolment_status"("enrolment_key") ON DELETE SET NULL
 );
 
 CREATE TABLE "accounts" (
@@ -38,6 +38,17 @@ CREATE TABLE "assessments" (
     "assessment_title" VARCHAR (255) NOT NULL,
     "assessment_level" BIGINT NOT NULL,
     "score" BIGINT NOT NULL
+)
+
+CREATE TABLE "enrolments" (
+    "enrolment_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+    "student_id" BIGINT NOT NULL
+    "current_status" DATE NOT NULL,
+    "membership" VARCHAR (255) NOT NULL,
+    "enrolment start" BIGINT NOT NULL,
+    "enrolment_end" BIGINT NOT NULL,
+    "total_hold_length" VARCHAR (255) NOT NULL
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
 )
 
 CREATE TABLE assessments_students(
@@ -89,7 +100,7 @@ CREATE TABLE "users" (
     "salt" VARCHAR(255) NOT NULL
 );
 
-INSERT INTO enrolment_status (enrolment_id, enrolment_status) VALUES 
+INSERT INTO enrolment_status (enrolment_key, enrolment_status) VALUES 
     (0, 'Enrolment'),
     (1, 'On Hold');
 
