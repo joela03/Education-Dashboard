@@ -349,7 +349,7 @@ def check_for_popup(driver):
         print("Close button not found or div did not appear.")
         
         
-def get_hold_end_date(holds: str) -> datetime:
+def get_hold_dates(holds: str) -> datetime:
     """Takes a string with two dates and returns last date which when the hold ends"""
     
     split_dates = holds.split(' - ')
