@@ -24,16 +24,16 @@ if __name__ == "__main__":
 
         # Scrape student report
         select_reports(driver, 3)
-        student_df = scrape_table(driver, "gridStudentReport", 0)
+        student_df = scrape_table(driver, "gridStudentReport", 0, 0)
 
         # Scrape student who are on hold
         interact_with_k_dropdown(driver, "enrollmentFiltersDropDownList", 4)
         click(driver, "btnsearch")       
-        student_hold_df = scrape_table(driver, "gridStudentReport", 0)
+        student_hold_df = scrape_table(driver, "gridStudentReport", 0, 0)
         
         # Scrape assessment report
         select_assessment_report(driver)
-        assessments_df = scrape_table(driver, "gridAssessmentReport", 0)
+        assessments_df = scrape_table(driver, "gridAssessmentReport", 0, 0)
         clean_whitespace = lambda text: ' '.join(text.split())
         assessments_df.columns = [clean_whitespace(col) for col in assessments_df.columns]
 
@@ -49,13 +49,13 @@ if __name__ == "__main__":
 
         # Scrape enrolment reports
         select_enrolment_report(driver, 3)
-        enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0)
+        enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0, 1)
 
         select_enrolment_report(driver, 4)
-        enrolment_hold_df = scrape_table(driver, "gridEnrollmentReport", 0)
+        enrolment_hold_df = scrape_table(driver, "gridEnrollmentReport", 0, 1)
 
         select_enrolment_report(driver, 2)
-        pre_enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0)
+        pre_enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0, 1)
         
         # Merge enrolment reports
         hold_enrolment_df = merge_df(enrolment_df, enrolment_hold_df)
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
         # Scrape hold table
         select_hold_report(driver)
-        hold_df = scrape_table(driver, "gridHoldsReport", 0)
+        hold_df = scrape_table(driver, "gridHoldsReport", 0, 0)
         hold_df.columns = [clean_whitespace(col) for col in hold_df.columns]
         hold_df[['Hold start date', 'Hold end date']] = pd.DataFrame(hold_df['Holds'].apply(get_hold_dates).to_list(), index=hold_df.index)
         hold_df.to_csv('hold.csv', index=False) 
