@@ -362,8 +362,8 @@ def get_hold_dates(holds: str) -> datetime:
     hold_end_string = split_dates[-1].strip()
     hold_start_string = split_dates[0].strip()
     
-    hold_start_date = datetime.strptime(hold_start_string, "%d/%m/%Y")
-    hold_end_date = datetime.strptime(hold_end_string, "%d/%m/%Y")
+    hold_start_date = datetime.strptime(hold_start_string, "%d/%m/%y")
+    hold_end_date = datetime.strptime(hold_end_string, "%d/%m/%y")
     
     return hold_start_date, hold_end_date
     
