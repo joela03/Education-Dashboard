@@ -12,6 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from dotenv import load_dotenv
 
@@ -335,3 +336,25 @@ def select_dropdown_by_input(driver, input_id: str, target_value: str):
 
     # Simulate pressing ENTER to select the option
     input_field.send_keys(Keys.ENTER)
+    
+def check_for_popup(driver):
+    """Checks if their is a pop up on the screen and closes it"""
+    
+    try:
+        wait = WebDriverWait(driver, 10)
+        close_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//button[contains(@class, 'close')]")))  
+        close_button.click()
+
+    except (TimeoutException, NoSuchElementException):
+        print("Close button not found or div did not appear.")
+        
+        
+def get_hold_end_date(holds: str) -> datetime:
+    """Takes a string with two dates and returns last date which when the hold ends"""
+    
+    split_dates = holds.split('').strip()
+    hold_end_string = split_dates[-1]
+    hold_end_date = datetime.strptime(hold_end_string, "%d/%m/%Y")
+    
+    return hold_end_date
+    
