@@ -61,6 +61,11 @@ if __name__ == "__main__":
         hold_enrolment_df = merge_df(enrolment_df, enrolment_hold_df)
         joined_enrolment_df = merge_df(hold_enrolment_df, pre_enrolment_df)
         joined_enrolment_df.columns = [clean_whitespace(col) for col in joined_enrolment_df.columns]
+
+        joined_enrolment_df['Student First Name'] = joined_enrolment_df.apply(lambda row: row['Student First Name'] +
+                                                ' ' + row['Student Last Name'], axis=1)
+        joined_enrolment_df.rename(columns={"Student First Name": "Student",
+                "Student First Name Link": "Account Link" }, inplace=True)
         joined_enrolment_df.to_csv('enrolment.csv', index=False) 
 
         # Scrape hold table
