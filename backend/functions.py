@@ -169,7 +169,7 @@ def input_date(driver, date: str, element_id: str):
                       split_reversed_date[0])
 
 def scrape_table(driver, table_id: str, progress_report: bool, enrolment_report: bool):
-    "Scrapes content from the page and adds it to a pandas df"
+    """Scrapes content from the page and adds it to a pandas DataFrame."""
 
     time.sleep(5)
 
@@ -177,12 +177,13 @@ def scrape_table(driver, table_id: str, progress_report: bool, enrolment_report:
     student_report_table = driver.find_element(By.ID, table_id)
 
     # Extract headers
-    headers = [header.text.strip() for header in
-            student_report_table.find_elements(By.TAG_NAME, 'th')]
+    headers = [header.text.strip() for header in student_report_table.find_elements(By.TAG_NAME, 'th')]
 
-    # Ensure headers are available
-    if headers and len(headers) > 0:
-        headers.insert(1, headers[0] + " Link")
+    # Ensure headers exist and insert "Link" column after the first column
+    if headers:
+        headers.insert(1, headers[0] + " Link")  # First link column
+        if enrolment_report:
+            headers.append("Account Link")  # Append new column at the end if enrolment_report is true
 
     # Extract table rows
     rows = student_report_table.find_elements(By.TAG_NAME, 'tr')
@@ -193,32 +194,46 @@ def scrape_table(driver, table_id: str, progress_report: bool, enrolment_report:
 
         if cells:
             row_data = []
+            
+            # Extract text & link from the first column
             first_col_text = cells[0].text.strip()
             first_col_link = None
 
-            # Extract the link if present in the first column
             link = cells[0].find_elements(By.TAG_NAME, 'a')
             if link:
                 first_col_link = link[0].get_attribute("href")
 
-            # Append text and link
+            # Add first column text and link
             row_data.append(first_col_text)
             row_data.append(first_col_link)
 
-            # If progress_report, extract the second <a> tag
+            # Extract the progress report link (if applicable)
             if progress_report and len(cells) > 2:
                 links_in_third_col = cells[2].find_elements(By.TAG_NAME, 'a')
                 if len(links_in_third_col) > 1:
-                    row_data[1] = links_in_third_col[1].get_attribute("href")
+                    row_data[1] = links_in_third_col[1].get_attribute("href")  # Overwrite first link
 
-            # If enrolment_report, extract the <a> tag 
+            # Extract Account Name link (if enrolment report is enabled)
+            account_name_link = None
             if enrolment_report and len(cells) > 3:
-                links_in_fourth_col = cells[3].find_elements(By.TAG_NAME, 'a')
-                if links_in_fourth_col:
-                    row_data[1] = links_in_fourth_col[0].get_attribute("href")
-
-            # Append the remaining columns as text
+                links_in_account_col = cells[3].find_elements(By.TAG_NAME, 'a')
+                if links_in_account_col:
+                    account_name_link = links_in_account_col[0].get_attribute("href") 
+                    
+            # Append the remaining text columns (excluding first column)
             row_data.extend([cell.text.strip() for cell in cells[1:]])
+
+            # If enrolment_report, append Account Name link
+            if enrolment_report:
+                row_data.append(account_name_link)
+            else:
+                row_data.append(None)
+
+            # Ensure row length matches headers length
+            while len(row_data) < len(headers):
+                row_data.append(None)
+            while len(row_data) > len(headers):
+                row_data.pop()
 
             data.append(row_data)
 
