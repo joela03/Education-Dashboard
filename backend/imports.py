@@ -205,3 +205,21 @@ def insert_user(username: str, password: str, conn):
     finally:
         if conn:
             conn.close()
+
+def get_student_id(conn, mathnasium_id: int) -> int:
+    """Retrieves id of a student given a mathnasium id"""
+
+    try:
+        with conn.cursor() as curs:
+            curs.execute(
+                """SELECT student_id
+                FROM student_information
+                WHERE mathnasium_id = %s""",
+                (mathnasium_id,)
+            )
+            result = curs.fetchone()
+            return result[0] if result else None
+    except psycopg2.Error as e:
+        print(f"An error occured: {e}")
+        conn.rollback()
+        return None
