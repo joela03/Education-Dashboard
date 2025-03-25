@@ -4,8 +4,7 @@ import hashlib
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
-from functions import (safe_date, percentage_to_float, ensure_list,
-                    add_mathnasium_id_column)
+from functions import (safe_date, percentage_to_float, ensure_list)
 
 def get_db_connection():
     """Sets up connection with database"""
