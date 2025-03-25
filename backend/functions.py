@@ -226,8 +226,6 @@ def scrape_table(driver, table_id: str, progress_report: bool, enrolment_report:
             # If enrolment_report, append Account Name link
             if enrolment_report:
                 row_data.append(account_name_link)
-            else:
-                row_data.append(None)
 
             # Ensure row length matches headers length
             while len(row_data) < len(headers):
@@ -235,14 +233,24 @@ def scrape_table(driver, table_id: str, progress_report: bool, enrolment_report:
             while len(row_data) > len(headers):
                 row_data.pop()
 
+            # Strip the entire row data to remove any stray whitespace that could cause empty rows
+            row_data = [x.strip() if isinstance(x, str) else x for x in row_data]
+
+            # Check if empty
+            if not any(row_data):  
+                continue
+
             data.append(row_data)
 
-    # Handle missing headers
+    # Handle missing headers (if table is empty)
     if not headers and data:
         headers = [f"Column {i+1}" for i in range(len(data[0]))]
 
     # Convert to DataFrame
     df = pd.DataFrame(data, columns=headers)
+
+    # Remove rows where all values are None or NaN
+    df = df.dropna(how='all')
 
     return df
 
