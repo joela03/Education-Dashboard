@@ -46,6 +46,8 @@ if __name__ == "__main__":
                         "Student First Name Link": "Student Link" }, inplace=True)
 
         # Drop useless columns
+        assessments_df.rename(columns={"Student First Name": "Student",
+                                "Student First Name Link": "Student Link" }, inplace=True)
         assessments_df = assessments_df.drop(['Signup Date','Virtual Center'], axis=1)
         assessments_df.to_csv('assessments.csv', index=False) 
 
@@ -69,8 +71,14 @@ if __name__ == "__main__":
                                                 ' ' + row['Student Last Name'], axis=1)
         joined_enrolment_df.rename(columns={"Student First Name": "Student",
                 "Student First Name Link": "Student Link"}, inplace=True)
-        joined_enrolment_df.to_csv('enrolment.csv', index=False)
         joined_enrolment_df = add_mathnasium_id_column(joined_enrolment_df)
+
+        pre_enrolment_df.rename(columns={"Student First Name": "Student",
+                "Student First Name Link": "Student Link"}, inplace=True)
+        pre_enrolment_df.columns = [clean_whitespace(col) for col in pre_enrolment_df.columns]
+        pre_enrolment_df.columns = pre_enrolment_df.columns.str.replace("\n", " ", regex=True)
+        pre_enrolment_df.to_csv('enrolment.csv', index=False)
+        pre_enrolment_df = add_mathnasium_id_column(pre_enrolment_df)
 
         # Scrape hold table
         select_hold_report(driver)
@@ -126,8 +134,6 @@ if __name__ == "__main__":
     conn = get_db_connection()
     import_students_to_database(conn, merged_df)
 
-    pre_enrolment_df.columns = [clean_whitespace(col) for col in pre_enrolment_df.columns]
-    pre_enrolment_df = add_mathnasium_id_column(pre_enrolment_df)
     insert_preenroled_into_students(conn, pre_enrolment_df)
 
     insert_into_assessments_db(conn, assessments_df)
