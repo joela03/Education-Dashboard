@@ -4,7 +4,8 @@ import hashlib
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
-from functions import (safe_date, percentage_to_float, ensure_list)
+from functions import (safe_date, percentage_to_float, ensure_list,
+                    add_mathnasium_id_column)
 
 def get_db_connection():
     """Sets up connection with database"""
@@ -64,12 +65,11 @@ def import_students_to_database(conn, df):
         # Insert into student_information table
         curs.execute("""
             INSERT INTO student_information (name, mathnasium_id, student_link,
-                    delivery_id enrolment_key, year)
+                    delivery_id, year)
             VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (mathnasium_id) DO UPDATE 
             SET name = EXCLUDED.name,
                 student_link = EXCLUDED.student_link,
-                enrolment_key = EXCLUDED.enrolment_key,
                 delivery_id = EXCLUDED.delivery_id,
                 year = EXCLUDED.year
             RETURNING student_id;
@@ -77,7 +77,6 @@ def import_students_to_database(conn, df):
             row.get('Mathnasium ID'),
             row['Student Link'],
             delivery_id,
-            enrolment_key, 
             0 if row['Year'] == "Reception" else (13 if row['Year'] == "College" else row['Year']),
             ))
         student_id = curs.fetchone().get('student_id')
@@ -222,6 +221,40 @@ def get_student_id(conn, mathnasium_id: int) -> int:
             )
             result = curs.fetchone()
             return result[0] if result else None
+    except psycopg2.Error as e:
+        print(f"An error occured: {e}")
+        conn.rollback()
+        return None
+    
+def insert_preenroled_into_students(conn, df):
+    """Inserts student with a status of pre-enroled into the students database"""
+
+    try:
+        df = add_mathnasium_id_column(df)
+
+        for _, row in df.iterrows():
+                delivery_type = row.get('Current Status').strip()
+                delivery_id = get_status_key('delivery', delivery_type)
+
+                with conn.cursor() as curs:
+                    curs.execute("""
+                    INSERT INTO student_information (name, mathnasium_id, student_link,
+                            delivery_id, year)
+                    VALUES (%s, %s, %s, %s, %s)
+                    ON CONFLICT (mathnasium_id) DO UPDATE 
+                    SET name = EXCLUDED.name,
+                        student_link = EXCLUDED.student_link,
+                        delivery_id = EXCLUDED.delivery_id,
+                        year = EXCLUDED.year;
+                """, (row.get('Student'),
+                    row.get('Mathnasium ID'),
+                    row.get('Student Link'),
+                    delivery_id,
+                    0 if row.get('Year') == "Reception" else (13 if row.get('Year') == "College" else row.get('Year')),
+                    ))
+
+        conn.commit()
+ 
     except psycopg2.Error as e:
         print(f"An error occured: {e}")
         conn.rollback()
