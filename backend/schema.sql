@@ -42,7 +42,7 @@ CREATE TABLE "assessments" (
 
 CREATE TABLE "enrolments" (
     "enrolment_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    "student_id" BIGINT NOT NULL
+    "mathnasium_id" BIGINT NOT NULL
     "current_status" DATE NOT NULL,
     "membership" VARCHAR (255) NOT NULL,
     "enrolment start" BIGINT NOT NULL,
