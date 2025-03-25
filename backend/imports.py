@@ -308,3 +308,43 @@ def insert_into_assessments_db(conn, df):
         print(f"An error occurred: {e}")
         conn.rollback()
         return None
+
+def insert_into_enrolments_db(conn, df):
+    """Inserts enrolments into the enrolments database."""
+    
+    try:
+        with conn.cursor() as curs:
+            for _, row in df.iterrows():
+                student_id = get_student_id(conn, row.get("Mathnasium ID"))
+                if not student_id:
+                    print(f"Skipping enrolment entry for missing student ID: {row.get('Mathnasium ID')}")
+                    continue
+
+                enrolment_key = get_status_key("enrolment", row.get("Current Status", ""))
+
+                # Insert into enrolments table
+                curs.execute("""
+                    INSERT INTO enrolments (student_id, enrolment_key, membership,
+                                            enrolment_start, enrolment_end, total_hold_length)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (student_id, enrolment_key) DO UPDATE
+                    SET membership = EXCLUDED.membership,
+                        enrolment_start = EXCLUDED.enrolment_start,
+                        enrolment_end = EXCLUDED.enrolment_end,
+                        total_hold_length = EXCLUDED.total_hold_length
+                    RETURNING enrolment_id;
+                """, (
+                    student_id,
+                    enrolment_key,
+                    row.get("Membership Type"),
+                    row.get("Enrollment Start"),
+                    row.get("Enrollment End"),
+                    row.get("Total Hold Length")
+                ))
+
+        conn.commit()
+    
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        conn.rollback()
+        return None
