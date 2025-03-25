@@ -55,7 +55,7 @@ def import_students_to_database(conn, df):
 
     for _, row in df.iterrows():
         # Convert Enrolment Status and Delivery to keys
-        delivery_type = row.get('Delivery', '').strip()
+        delivery_type = row.get('Delivery', '')
         delivery_id = get_status_key('delivery', delivery_type)
 
         # Insert into student_information table
@@ -117,7 +117,7 @@ def import_students_to_database(conn, df):
                 last_progress_check, mathnasium_id, total_lp_skills_mastered, total_lp_skills,
                 skills_mastered_percent
             )
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (student_id) DO UPDATE 
             SET attendance_count = EXCLUDED.attendance_count,
                 last_attendance = EXCLUDED.last_attendance,
@@ -228,23 +228,24 @@ def insert_preenroled_into_students(conn, df):
     try:
 
         for _, row in df.iterrows():
-                delivery_type = row.get('Current Status').strip()
+                delivery_type = row.get('Current Status')
                 delivery_id = get_status_key('delivery', delivery_type)
 
-                enrolment_status = row.get('Enrolment Status', '').strip()
+                enrolment_status = row.get('Enrolment Status', '')
                 enrolment_key = get_status_key('enrolment', enrolment_status)
 
                 with conn.cursor() as curs:
                     curs.execute("""
                     INSERT INTO student_information (name, mathnasium_id, student_link,
                             delivery_id, year, enrolment_key)
-                    VALUES (%s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s)
                     ON CONFLICT (mathnasium_id) DO UPDATE 
                     SET name = EXCLUDED.name,
                         student_link = EXCLUDED.student_link,
                         delivery_id = EXCLUDED.delivery_id,
-                        year = EXCLUDED.year;
-                """, (row.get('Student'),
+                        year = EXCLUDED.year,
+                    enrolment_key = EXCLUDED.enrolment_key;
+                """, (row.get('Student First Name') + ' ' + row.get('Student Last Name'),
                     row.get('Mathnasium ID'),
                     row.get('Student Link'),
                     delivery_id,
