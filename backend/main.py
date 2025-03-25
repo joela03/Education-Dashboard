@@ -11,7 +11,9 @@ from functions import (get_credentials_from_env, enter_credentials_to_website,
                        select_progress_report_batch, add_mathnasium_id_column,
                        select_assessment_report, select_hold_report, select_enrolment_report,
                        check_for_popup, get_hold_dates)
-from imports import (get_db_connection, import_students_to_database)
+
+from imports import (get_db_connection, import_students_to_database, insert_into_assessments_db,
+                    insert_into_enrolments_db, insert_into_holds_db, insert_preenroled_into_students)
 
 if __name__ == "__main__":
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
@@ -65,8 +67,9 @@ if __name__ == "__main__":
         joined_enrolment_df['Student First Name'] = joined_enrolment_df.apply(lambda row: row['Student First Name'] +
                                                 ' ' + row['Student Last Name'], axis=1)
         joined_enrolment_df.rename(columns={"Student First Name": "Student",
-                "Student First Name Link": "Student Link" }, inplace=True)
-        joined_enrolment_df.to_csv('enrolment.csv', index=False) 
+                "Student First Name Link": "Student Link"}, inplace=True)
+        joined_enrolment_df.to_csv('enrolment.csv', index=False)
+        joined_enrolment_df = add_mathnasium_id_column(joined_enrolment_df)
 
         # Scrape hold table
         select_hold_report(driver)
@@ -121,3 +124,11 @@ if __name__ == "__main__":
 
     conn = get_db_connection()
     import_students_to_database(conn, merged_df)
+    insert_preenroled_into_students(conn, pre_enrolment_df)
+
+    insert_into_assessments_db(conn, assessments_df)
+
+    insert_into_enrolments_db(conn, joined_enrolment_df)
+
+    insert_into_holds_db(conn, hold_df)
+
