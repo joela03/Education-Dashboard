@@ -56,9 +56,6 @@ def import_students_to_database(conn, df):
 
     for _, row in df.iterrows():
         # Convert Enrolment Status and Delivery to keys
-        enrolment_status = row.get('Enrolment Status', '').strip()
-        enrolment_key = get_status_key('enrolment', enrolment_status)
-
         delivery_type = row.get('Delivery', '').strip()
         delivery_id = get_status_key('delivery', delivery_type)
 
@@ -235,10 +232,13 @@ def insert_preenroled_into_students(conn, df):
                 delivery_type = row.get('Current Status').strip()
                 delivery_id = get_status_key('delivery', delivery_type)
 
+                enrolment_status = row.get('Enrolment Status', '').strip()
+                enrolment_key = get_status_key('enrolment', enrolment_status)
+
                 with conn.cursor() as curs:
                     curs.execute("""
                     INSERT INTO student_information (name, mathnasium_id, student_link,
-                            delivery_id, year)
+                            delivery_id, year, enrolment_key)
                     VALUES (%s, %s, %s, %s, %s)
                     ON CONFLICT (mathnasium_id) DO UPDATE 
                     SET name = EXCLUDED.name,
@@ -250,6 +250,7 @@ def insert_preenroled_into_students(conn, df):
                     row.get('Student Link'),
                     delivery_id,
                     0 if row.get('Year') == "Reception" else (13 if row.get('Year') == "College" else row.get('Year')),
+                    enrolment_key,
                     ))
 
         conn.commit()
