@@ -228,10 +228,10 @@ def insert_preenroled_into_students(conn, df):
     try:
 
         for _, row in df.iterrows():
-                delivery_type = row.get('Current Status')
+                delivery_type = row.get('Current Delivery Method')
                 delivery_id = get_status_key('delivery', delivery_type)
 
-                enrolment_status = row.get('Enrolment Status', '')
+                enrolment_status = row.get('Current Status')
                 enrolment_key = get_status_key('enrolment', enrolment_status)
 
                 with conn.cursor() as curs:
@@ -265,9 +265,9 @@ def insert_into_assessments_db(conn, df):
 
     try:
         for _, row in df.iterrows():
-            student_id = get_student_id(conn, row.get("Mathnasium ID"))
+            student_id = get_id_from_name(conn, row.get("Student"))
             if not student_id:
-                print(f"Skipping assessment entry for missing student ID: {row.get('Mathnasium ID')}")
+                print(f"Skipping assessment entry for missing student ID: {row.get('Student')}")
                 continue
 
             score = percentage_to_float(row.get("Score"))
@@ -314,6 +314,10 @@ def insert_into_enrolments_db(conn, df):
     """Inserts enrolments into the enrolments database."""
     
     try:
+        if df is None or df.empty:
+            print("DataFrame is empty or None, skipping insertion.")
+            return None
+        
         with conn.cursor() as curs:
             for _, row in df.iterrows():
                 student_id = get_student_id(conn, row.get("Mathnasium ID"))
@@ -386,13 +390,13 @@ def insert_into_holds_db(conn, df):
                     VALUES (%s, %s, %s, %s)
                     ON CONFLICT (student_id, hold_start_date) DO UPDATE
                     SET hold_end_date = EXCLUDED.hold_end_date,
-                    current_hold_length = EXCLUDED.current_hold_length;
+                        current_hold_length = EXCLUDED.current_hold_length;
                 """, (
-                    student_id),
+                    student_id,  
                     row.get("Hold start date"),
                     row.get("Hold end date"),
-                    row.get("Current Hold Length")
-                )
+                    row.get("Current Hold Length") 
+                ))
 
         conn.commit()
     
