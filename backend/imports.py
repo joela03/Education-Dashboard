@@ -348,3 +348,54 @@ def insert_into_enrolments_db(conn, df):
         print(f"An error occurred: {e}")
         conn.rollback()
         return None
+    
+def get_id_from_name(conn, name: str):
+    """Gets id from Student Name"""
+
+    try:
+        with conn.cursor() as curs:
+            curs.execute(
+                """SELECT student_id
+                FROM student_information
+                WHERE name = %s""",
+                (name,)
+            )
+            result = curs.fetchone()
+            return result[0] if result else None
+    except psycopg2.Error as e:
+        print(f"An error occured: {e}")
+        conn.rollback()
+        return None   
+
+def insert_into_holds_db(conn, df):
+    """Inserts hold records into the holds database."""
+    
+    try:
+        with conn.cursor() as curs:
+            for _, row in df.iterrows():
+                student_id = get_id_from_name(conn, row.get("Student Name"))
+                if not student_id:
+                    print(f"Skipping hold entry for missing student ID: {row.get('Mathnasium ID')}")
+                    continue
+
+                # Insert into holds table
+                curs.execute("""
+                    INSERT INTO holds (student_id, hold_start_date, hold_end_date,
+                                       current_hold_length)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (student_id, hold_start_date) DO UPDATE
+                    SET hold_end_date = EXCLUDED.hold_end_date,
+                    current_hold_length = EXCLUDED.current_hold_length;
+                """, (
+                    student_id),
+                    row.get("Hold start date"),
+                    row.get("Hold end date"),
+                    row.get("Current Hold Length")
+                )
+
+        conn.commit()
+    
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
+        conn.rollback()
+        return None
