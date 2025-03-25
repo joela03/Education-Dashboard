@@ -37,7 +37,8 @@ def get_status_key(status_type: str, status: str) -> int | None:
     status_mappings = {
         "enrolment": {
             "enrolment": 0,
-            "on hold": 1
+            "on hold": 1,
+            "pre-enroled": 2,
         },
         "delivery": {
             "in-centre": 0,
