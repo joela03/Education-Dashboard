@@ -230,7 +230,6 @@ def insert_preenroled_into_students(conn, df):
     """Inserts student with a status of pre-enroled into the students database"""
 
     try:
-        df = add_mathnasium_id_column(df)
 
         for _, row in df.iterrows():
                 delivery_type = row.get('Current Status').strip()
@@ -257,5 +256,55 @@ def insert_preenroled_into_students(conn, df):
  
     except psycopg2.Error as e:
         print(f"An error occured: {e}")
+        conn.rollback()
+        return None
+    
+def insert_into_assessments_db(conn, df):
+    """Inserts assessments into assessment db"""
+
+    try:
+        for _, row in df.iterrows():
+            student_id = get_student_id(conn, row.get("Mathnasium ID"))
+            if not student_id:
+                print(f"Skipping assessment entry for missing student ID: {row.get('Mathnasium ID')}")
+                continue
+
+            score = percentage_to_float(row.get("Score"))
+
+            with conn.cursor() as curs:
+                # Insert into assessments table
+                curs.execute("""
+                    INSERT INTO assessments (date_taken, assessment_title,
+                                            assessment_level, score)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (date_taken, assessment_title, assessment_level) DO UPDATE
+                    SET date_taken = EXCLUDED.date_taken,
+                        assessment_title = EXCLUDED.assessment_title,
+                        assessment_level = EXCLUDED.assessment_level,
+                        score = EXCLUDED.score
+                    RETURNING assessment_id;
+                """, (
+                    row.get("Date Taken"),
+                    row.get("Assessment Title"),
+                    row.get("Assessment Level"),
+                    score
+                ))
+
+                # Extract assessment_id
+                result = curs.fetchone()
+                if result:
+                    assessment_id = result[0]
+
+                    # Insert into assessments_students table
+                    curs.execute("""
+                        INSERT INTO assessments_students (assessment_id, student_id)
+                        VALUES (%s, %s)
+                        ON CONFLICT DO NOTHING;
+                    """, (assessment_id, student_id))
+
+            conn.commit()
+    
+    except psycopg2.Error as e:
+        print(f"An error occurred: {e}")
         conn.rollback()
         return None
