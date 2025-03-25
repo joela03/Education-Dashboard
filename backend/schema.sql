@@ -15,7 +15,9 @@ CREATE TABLE "student_information" (
     "student_link" VARCHAR(500),
     "delivery_id" BIGINT,
     "year" BIGINT NOT NULL,
-    FOREIGN KEY ("enrolment_key") REFERENCES "enrolment_status"("enrolment_key") ON DELETE SET NULL
+    "enrolment_key" BIGINT,
+    FOREIGN KEY ("enrolment_key") REFERENCES "enrolment_status"("enrolment_key") ON DELETE SET NULL,
+    FOREIGN KEY ("delivery_id") REFERENCES "delivery"("delivery_id") ON DELETE SET NULL
 );
 
 CREATE TABLE "accounts" (
@@ -38,26 +40,26 @@ CREATE TABLE "assessments" (
     "assessment_title" VARCHAR (255) NOT NULL,
     "assessment_level" BIGINT NOT NULL,
     "score" BIGINT NOT NULL
-)
+);
 
 CREATE TABLE "enrolments" (
     "enrolment_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "student_id" BIGINT NOT NULL,
     "enrolment_key" BIGINT,
-    "membership" VARCHAR (255) NOT NULL,
-    "enrolment start" BIGINT NOT NULL,
+    "membership" VARCHAR(255) NOT NULL,
+    "enrolment_start" BIGINT NOT NULL,
     "enrolment_end" BIGINT NOT NULL,
-    "total_hold_length" VARCHAR (255) NOT NULL
-    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
-)
+    "total_hold_length" VARCHAR(255) NOT NULL,
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE
+);
 
-CREATE TABLE assessments_students(
+CREATE TABLE assessments_students (
     "assessment_id" BIGINT NOT NULL,
     "student_id" BIGINT NOT NULL,
     PRIMARY KEY ("student_id", "assessment_id"),
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
     FOREIGN KEY ("assessment_id") REFERENCES "assessments"("assessment_id") ON DELETE RESTRICT
-)
+);
 
 CREATE TABLE "student_education_stats" (
     "student_id" BIGINT NOT NULL UNIQUE PRIMARY KEY,
@@ -112,7 +114,8 @@ CREATE TABLE "users" (
 
 INSERT INTO enrolment_status (enrolment_key, enrolment_status) VALUES 
     (0, 'Enrolment'),
-    (1, 'On Hold');
+    (1, 'On Hold'),
+    (2, 'Pre-Enroled');
 
 INSERT INTO delivery (delivery_id, delivery_type) VALUES 
     (0, 'In-Centre'),
