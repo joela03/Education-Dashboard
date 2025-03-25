@@ -58,6 +58,7 @@ if __name__ == "__main__":
 
         select_enrolment_report(driver, 2)
         pre_enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0, 1)
+        pre_enrolment_df.to_csv("pre_enrolment.csv", index=False )
         
         # Merge enrolment reports
         hold_enrolment_df = merge_df(enrolment_df, enrolment_hold_df)
@@ -124,6 +125,9 @@ if __name__ == "__main__":
 
     conn = get_db_connection()
     import_students_to_database(conn, merged_df)
+
+    pre_enrolment_df.columns = [clean_whitespace(col) for col in pre_enrolment_df.columns]
+    pre_enrolment_df = add_mathnasium_id_column(pre_enrolment_df)
     insert_preenroled_into_students(conn, pre_enrolment_df)
 
     insert_into_assessments_db(conn, assessments_df)
