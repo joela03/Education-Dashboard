@@ -13,6 +13,7 @@ CREATE TABLE "student_information" (
     "name" VARCHAR(255) NOT NULL,
     "mathnasium_id" BIGINT UNIQUE NOT NULL,
     "student_link" VARCHAR(500),
+    "delivery_id" BIGINT,
     "enrolment_key" BIGINT,
     "year" BIGINT NOT NULL,
     FOREIGN KEY ("enrolment_key") REFERENCES "enrolment_status"("enrolment_key") ON DELETE SET NULL
@@ -61,7 +62,6 @@ CREATE TABLE assessments_students(
 
 CREATE TABLE "student_education_stats" (
     "student_id" BIGINT NOT NULL UNIQUE PRIMARY KEY,
-    "delivery_id" BIGINT,
     "attendance_count" BIGINT,
     "last_attendance" DATE,
     "last_assessment" DATE,

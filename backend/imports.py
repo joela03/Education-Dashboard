@@ -63,17 +63,21 @@ def import_students_to_database(conn, df):
 
         # Insert into student_information table
         curs.execute("""
-            INSERT INTO student_information (name, mathnasium_id, student_link, enrolment_key, year)
+            INSERT INTO student_information (name, mathnasium_id, student_link,
+                    delivery_id enrolment_key, year)
             VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (mathnasium_id) DO UPDATE 
             SET name = EXCLUDED.name,
                 student_link = EXCLUDED.student_link,
                 enrolment_key = EXCLUDED.enrolment_key,
+                delivery_id = EXCLUDED.delivery_id,
                 year = EXCLUDED.year
             RETURNING student_id;
         """, (row['Student'],
             row.get('Mathnasium ID'),
-            row['Student Link'], enrolment_key, 
+            row['Student Link'],
+            delivery_id,
+            enrolment_key, 
             0 if row['Year'] == "Reception" else (13 if row['Year'] == "College" else row['Year']),
             ))
         student_id = curs.fetchone().get('student_id')
@@ -113,15 +117,14 @@ def import_students_to_database(conn, df):
         # Insert into student_education_stats table
         curs.execute("""
             INSERT INTO student_education_stats (
-                student_id, delivery_id, attendance_count, last_attendance, last_assessment,
+                student_id, attendance_count, last_attendance, last_assessment,
                 active_lps, skills_assigned, skills_mastered, last_lp_update, last_pr_sent,
                 last_progress_check, mathnasium_id, total_lp_skills_mastered, total_lp_skills,
                 skills_mastered_percent
             )
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             ON CONFLICT (student_id) DO UPDATE 
-            SET delivery_id = EXCLUDED.delivery_id,
-                attendance_count = EXCLUDED.attendance_count,
+            SET attendance_count = EXCLUDED.attendance_count,
                 last_attendance = EXCLUDED.last_attendance,
                 last_assessment = EXCLUDED.last_assessment,
                 active_lps = EXCLUDED.active_lps,
@@ -135,7 +138,7 @@ def import_students_to_database(conn, df):
                 total_lp_skills = EXCLUDED.total_lp_skills,
                 skills_mastered_percent = EXCLUDED.skills_mastered_percent;
         """, (
-            student_id, delivery_id, row['Attendance'],
+            student_id, row['Attendance'],
             safe_date(row['Last Attendance']),
             safe_date(row['Last Assessment']),
             row['Active LPs'],
