@@ -14,7 +14,6 @@ CREATE TABLE "student_information" (
     "mathnasium_id" BIGINT UNIQUE NOT NULL,
     "student_link" VARCHAR(500),
     "delivery_id" BIGINT,
-    "enrolment_key" BIGINT,
     "year" BIGINT NOT NULL,
     FOREIGN KEY ("enrolment_key") REFERENCES "enrolment_status"("enrolment_key") ON DELETE SET NULL
 );
@@ -43,8 +42,8 @@ CREATE TABLE "assessments" (
 
 CREATE TABLE "enrolments" (
     "enrolment_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    "mathnasium_id" BIGINT NOT NULL
-    "current_status" DATE NOT NULL,
+    "student_id" BIGINT NOT NULL,
+    "enrolment_key" BIGINT,
     "membership" VARCHAR (255) NOT NULL,
     "enrolment start" BIGINT NOT NULL,
     "enrolment_end" BIGINT NOT NULL,
@@ -77,6 +76,17 @@ CREATE TABLE "student_education_stats" (
     "skills_mastered_percent" DECIMAL(5,2),
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
     FOREIGN KEY ("delivery_id") REFERENCES "delivery"("delivery_id") ON DELETE SET NULL
+);
+
+CREATE TABLE holds (
+    "hold_id" BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    "student_id" BIGINT NOT NULL,
+    "hold_start_date" DATE NOT NULL,
+    "hold_end_date" DATE,
+    "current_hold_length" VARCHAR(255) NOT NULL,
+    "total_hold_length" VARCHAR(255),
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
+    UNIQUE ("student_id", "hold_start_date")
 );
 
 CREATE TABLE "guardians" (
