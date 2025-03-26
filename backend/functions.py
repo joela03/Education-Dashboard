@@ -314,10 +314,15 @@ def select_progress_report_batch(driver):
     time.sleep(3)
 
 def add_mathnasium_id_column(df):
-    "Extracts id from link column and makes new Mathnasium ID column"
+    
+    if "Student Link" not in df.columns:
+        print("'Student Link' column not found in DataFrame!")
+        return df
 
     df["Mathnasium ID"] = df["Student Link"].apply(lambda x: x.split("/")[-1]
                                                    if pd.notna(x) else None)
+    
+    return df
 
 def safe_date(value):
     """Converts NaT or NaN values to None"""
