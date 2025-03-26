@@ -48,7 +48,7 @@ CREATE TABLE "enrolments" (
     "membership" VARCHAR(255) NOT NULL,
     "enrolment_start" DATE NOT NULL,
     "enrolment_end" DATE NOT NULL,
-    "total_hold_length" VARCHAR(255) NOT NULL,
+    "total_hold_length" VARCHAR(255),
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE
 );
 
