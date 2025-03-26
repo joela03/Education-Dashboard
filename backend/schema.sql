@@ -37,12 +37,13 @@ CREATE TABLE "assessments" (
     "date_taken" DATE NOT NULL,
     "assessment_title" VARCHAR (255) NOT NULL,
     "assessment_level" VARCHAR (255) NOT NULL,
-    "score" BIGINT NOT NULL
+    "score" BIGINT NOT NULL,
+    CONSTRAINT unique_assessment UNIQUE (date_taken, assessment_title, assessment_level)
 );
 
 CREATE TABLE "enrolments" (
     "enrolment_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    "student_id" BIGINT NOT NULL,
+    "student_id" BIGINT NOT NULL UNIQUE,
     "enrolment_key" BIGINT,
     "membership" VARCHAR(255) NOT NULL,
     "enrolment_start" DATE NOT NULL,
