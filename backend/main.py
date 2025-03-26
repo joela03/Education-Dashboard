@@ -49,7 +49,6 @@ if __name__ == "__main__":
         assessments_df.rename(columns={"Student First Name": "Student",
                                 "Student First Name Link": "Student Link" }, inplace=True)
         assessments_df = assessments_df.drop(['Signup Date','Virtual Center'], axis=1)
-        assessments_df.to_csv('assessments.csv', index=False) 
 
         # Scrape enrolment reports
         select_enrolment_report(driver, 3)
@@ -60,33 +59,29 @@ if __name__ == "__main__":
 
         select_enrolment_report(driver, 2)
         pre_enrolment_df = scrape_table(driver, "gridEnrollmentReport", 0, 1)
-        pre_enrolment_df.to_csv("pre_enrolment.csv", index=False )
         
         # Merge enrolment reports
         hold_enrolment_df = merge_df(enrolment_df, enrolment_hold_df)
         joined_enrolment_df = merge_df(hold_enrolment_df, pre_enrolment_df)
-        joined_enrolment_df.columns = [clean_whitespace(col) for col in joined_enrolment_df.columns]
+        joined_enrolment_df.columns = [col.replace("\n", " ").strip() for col in joined_enrolment_df.columns]
 
-        joined_enrolment_df['Student First Name'] = joined_enrolment_df.apply(lambda row: row['Student First Name'] +
-                                                ' ' + row['Student Last Name'], axis=1)
         joined_enrolment_df.rename(columns={"Student First Name": "Student",
                 "Student First Name Link": "Student Link"}, inplace=True)
         joined_enrolment_df = add_mathnasium_id_column(joined_enrolment_df)
-        joined_enrolment_df.to_csv('enrolment.csv', index=False)
 
+        pre_enrolment_df['Student First Name'] = pre_enrolment_df.apply(lambda row: row['Student First Name'] +
+                                        ' ' + row['Student Last Name'], axis=1)
         pre_enrolment_df.rename(columns={"Student First Name": "Student",
                 "Student First Name Link": "Student Link"}, inplace=True)
-        pre_enrolment_df.columns = [clean_whitespace(col) for col in pre_enrolment_df.columns]
+        pre_enrolment_df.columns = [col.replace("\n", " ").strip() for col in pre_enrolment_df.columns]
         pre_enrolment_df.columns = pre_enrolment_df.columns.str.replace("\n", " ", regex=True)
-        pre_enrolment_df.to_csv('enrolment.csv', index=False)
         pre_enrolment_df = add_mathnasium_id_column(pre_enrolment_df)
 
         # Scrape hold table
         select_hold_report(driver)
         hold_df = scrape_table(driver, "gridHoldsReport", 0, 0)
-        hold_df.columns = [clean_whitespace(col) for col in hold_df.columns]
+        hold_df.columns = [col.replace("\n", " ").strip() for col in hold_df.columns]
         hold_df[['Hold start date', 'Hold end date']] = pd.DataFrame(hold_df['Holds'].apply(get_hold_dates).to_list(), index=hold_df.index)
-        hold_df.to_csv('hold.csv', index=False) 
 
         # Combine both dataframes
         joined_df = merge_df(student_df, student_hold_df)
@@ -133,6 +128,7 @@ if __name__ == "__main__":
         driver.quit()
 
     conn = get_db_connection()
+    
     import_students_to_database(conn, merged_df)
 
     insert_preenroled_into_students(conn, pre_enrolment_df)
