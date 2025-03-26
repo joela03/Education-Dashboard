@@ -15,7 +15,6 @@ CREATE TABLE "student_information" (
     "student_link" VARCHAR(500),
     "delivery_id" BIGINT,
     "year" BIGINT NOT NULL,
-    "enrolment_key" BIGINT,
     FOREIGN KEY ("enrolment_key") REFERENCES "enrolment_status"("enrolment_key") ON DELETE SET NULL,
     FOREIGN KEY ("delivery_id") REFERENCES "delivery"("delivery_id") ON DELETE SET NULL
 );
@@ -117,5 +116,5 @@ INSERT INTO enrolment_status (enrolment_key, enrolment_status) VALUES
 
 INSERT INTO delivery (delivery_id, delivery_type) VALUES 
     (0, 'In-Centre'),
-    (1, '@home');
+    (1, '@home'),
     (2, 'Hybrid');
