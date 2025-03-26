@@ -62,14 +62,14 @@ def import_students_to_database(conn, df):
         # Insert into student_information table
         curs.execute("""
             INSERT INTO student_information (name, mathnasium_id, student_link,
-                    delivery_id, year, enrolment_key)
-            VALUES (%s, %s, %s, %s, %s, %s)
+                    delivery_id, year)
+            VALUES (%s, %s, %s, %s, %s)
             ON CONFLICT (mathnasium_id) DO UPDATE 
             SET name = EXCLUDED.name,
                 student_link = EXCLUDED.student_link,
                 delivery_id = EXCLUDED.delivery_id,
                 year = EXCLUDED.year
-                enrolment_key = EXLCUDED.enrolment_key
+                enrolment_key = EXCLUDED.enrolment_key
             RETURNING student_id;
         """, (row['Student'],
             row.get('Mathnasium ID'),
@@ -77,7 +77,7 @@ def import_students_to_database(conn, df):
             delivery_id,
             0 if row['Year'] == "Reception" else (13 if row['Year'] == "College" else row['Year']),
             ))
-        student_id = curs.fetchone().get('student_id')
+        student_id = curs.fetchone()[0]
         conn.commit()
 
         # Insert into accounts table
@@ -262,50 +262,62 @@ def insert_preenroled_into_students(conn, df):
         return None
     
 def insert_into_assessments_db(conn, df):
-    """Inserts assessments into assessment db"""
+    """Inserts assessments into the assessment database"""
 
     try:
-        for _, row in df.iterrows():
-            student_id = get_id_from_name(conn, row.get("Student"))
-            if not student_id:
-                print(f"Skipping assessment entry for missing student ID: {row.get('Student')}")
-                continue
+        with conn.cursor() as curs:
+            for _, row in df.iterrows():
+                student_id = get_id_from_name(conn, row.get("Student"))
+                if not student_id:
+                    print(f"Skipping assessment entry for missing student ID: {row.get('Student')}")
+                    continue
 
-            score = percentage_to_float(row.get("Score"))
+                score = percentage_to_float(row.get("Score"))
 
-            with conn.cursor() as curs:
-                # Insert into assessments table
+                # Check if the assessment already exists
                 curs.execute("""
-                    INSERT INTO assessments (date_taken, assessment_title,
-                                            assessment_level, score)
-                    VALUES (%s, %s, %s, %s)
-                    ON CONFLICT (date_taken, assessment_title, assessment_level) DO UPDATE
-                    SET date_taken = EXCLUDED.date_taken,
-                        assessment_title = EXCLUDED.assessment_title,
-                        assessment_level = EXCLUDED.assessment_level,
-                        score = EXCLUDED.score
-                    RETURNING assessment_id;
-                """, (
-                    row.get("Date Taken"),
-                    row.get("Assessment Title"),
-                    row.get("Assessment Level"),
-                    score
-                ))
+                    SELECT assessment_id FROM assessments 
+                    WHERE date_taken = %s AND assessment_title = %s AND assessment_level = %s;
+                """, (row.get("Date Taken"), row.get("Assessment Title"), row.get("Assessment Level")))
 
-                # Extract assessment_id
-                result = curs.fetchone()
-                if result:
-                    assessment_id = result[0]
+                existing_record = curs.fetchone()
 
-                    # Insert into assessments_students table
+                if existing_record:
+                    # Update existing assessment
+                    assessment_id = existing_record[0]
+                    curs.execute("""
+                        UPDATE assessments 
+                        SET score = %s
+                        WHERE assessment_id = %s;
+                    """, (score, assessment_id))
+                else:
+                    # Insert new assessment
+                    curs.execute("""
+                        INSERT INTO assessments (date_taken, assessment_title, assessment_level, score)
+                        VALUES (%s, %s, %s, %s)
+                        RETURNING assessment_id;
+                    """, (
+                        row.get("Date Taken"),
+                        row.get("Assessment Title"),
+                        row.get("Assessment Level"),
+                        score
+                    ))
+
+                    assessment_id = curs.fetchone()[0]
+
+                # Insert into assessments_students if it doesn't exist
+                curs.execute("""
+                    SELECT 1 FROM assessments_students WHERE assessment_id = %s AND student_id = %s;
+                """, (assessment_id, student_id))
+
+                if not curs.fetchone():
                     curs.execute("""
                         INSERT INTO assessments_students (assessment_id, student_id)
-                        VALUES (%s, %s)
-                        ON CONFLICT DO NOTHING;
+                        VALUES (%s, %s);
                     """, (assessment_id, student_id))
 
-            conn.commit()
-    
+        conn.commit()
+
     except psycopg2.Error as e:
         print(f"An error occurred: {e}")
         conn.rollback()
@@ -313,12 +325,12 @@ def insert_into_assessments_db(conn, df):
 
 def insert_into_enrolments_db(conn, df):
     """Inserts enrolments into the enrolments database."""
-    
+
     try:
         if df is None or df.empty:
             print("DataFrame is empty or None, skipping insertion.")
             return None
-        
+
         with conn.cursor() as curs:
             for _, row in df.iterrows():
                 student_id = get_student_id(conn, row.get("Mathnasium ID"))
@@ -329,28 +341,47 @@ def insert_into_enrolments_db(conn, df):
                 enrolment_status = row.get("Current Status")
                 enrolment_key = get_status_key("enrolment", enrolment_status)
 
-                # Insert into enrolments table
+                # Check if enrolment already exists
                 curs.execute("""
-                    INSERT INTO enrolments (student_id, enrolment_key, membership,
-                                            enrolment_start, enrolment_end, total_hold_length)
-                    VALUES (%s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (student_id, enrolment_key) DO UPDATE
-                    SET membership = EXCLUDED.membership,
-                        enrolment_start = EXCLUDED.enrolment_start,
-                        enrolment_end = EXCLUDED.enrolment_end,
-                        total_hold_length = EXCLUDED.total_hold_length
-                    RETURNING enrolment_id;
-                """, (
-                    student_id,
-                    enrolment_key,
-                    row.get("Membership Type"),
-                    row.get("Enrollment Start"),
-                    row.get("Enrollment End"),
-                    row.get("Total Hold Length")
-                ))
+                    SELECT enrolment_id FROM enrolments 
+                    WHERE student_id = %s AND enrolment_key = %s;
+                """, (student_id, enrolment_key))
+
+                existing_record = curs.fetchone()
+
+                if existing_record:
+                    # Update existing record
+                    curs.execute("""
+                        UPDATE enrolments 
+                        SET membership = %s,
+                            enrolment_start = %s,
+                            enrolment_end = %s,
+                            total_hold_length = %s
+                        WHERE enrolment_id = %s;
+                    """, (
+                        row.get("Membership Type"),
+                        row.get("Enrollment Start"),
+                        row.get("Enrollment End"),
+                        row.get("Total Hold Length"),
+                        existing_record[0]
+                    ))
+                else:
+                    # Insert new record
+                    curs.execute("""
+                        INSERT INTO enrolments (student_id, enrolment_key, membership, 
+                                                enrolment_start, enrolment_end, total_hold_length)
+                        VALUES (%s, %s, %s, %s, %s, %s);
+                    """, (
+                        student_id,
+                        enrolment_key,
+                        row.get("Membership Type"),
+                        row.get("Enrollment Start"),
+                        row.get("Enrollment End"),
+                        row.get("Total Hold Length")
+                    ))
 
         conn.commit()
-    
+
     except psycopg2.Error as e:
         print(f"An error occurred: {e}")
         conn.rollback()
