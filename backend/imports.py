@@ -363,7 +363,7 @@ def insert_into_enrolments_db(conn, df):
                     """, (
                         row.get("Membership Type"),
                         row.get("Enrollment Start"),
-                        row.get("Enrollment End"),
+                        row.get("Enrolment End"),
                         row.get("Total Hold Length"),
                         existing_record[0]
                     ))
