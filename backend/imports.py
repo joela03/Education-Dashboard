@@ -245,7 +245,7 @@ def insert_preenroled_into_students(conn, df):
                         delivery_id = EXCLUDED.delivery_id,
                         year = EXCLUDED.year,
                     enrolment_key = EXCLUDED.enrolment_key;
-                """, (row.get('Student First Name') + ' ' + row.get('Student Last Name'),
+                """, (row.get('Student'),
                     row.get('Mathnasium ID'),
                     row.get('Student Link'),
                     delivery_id,
