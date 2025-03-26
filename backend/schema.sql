@@ -118,3 +118,4 @@ INSERT INTO enrolment_status (enrolment_key, enrolment_status) VALUES
 INSERT INTO delivery (delivery_id, delivery_type) VALUES 
     (0, 'In-Centre'),
     (1, '@home');
+    (2, 'Hybrid');
