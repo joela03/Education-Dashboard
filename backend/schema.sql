@@ -47,8 +47,8 @@ CREATE TABLE "enrolments" (
     "student_id" BIGINT NOT NULL,
     "enrolment_key" BIGINT,
     "membership" VARCHAR(255) NOT NULL,
-    "enrolment_start" BIGINT NOT NULL,
-    "enrolment_end" BIGINT NOT NULL,
+    "enrolment_start" DATE NOT NULL,
+    "enrolment_end" DATE NOT NULL,
     "total_hold_length" VARCHAR(255) NOT NULL,
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE
 );
@@ -83,9 +83,8 @@ CREATE TABLE holds (
     "hold_id" BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     "student_id" BIGINT NOT NULL,
     "hold_start_date" DATE NOT NULL,
-    "hold_end_date" DATE,
-    "current_hold_length" VARCHAR(255) NOT NULL,
-    "total_hold_length" VARCHAR(255),
+    "hold_end_date" DATE NOT NULL,
+    "current_hold_length" VARCHAR(255),
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
     UNIQUE ("student_id", "hold_start_date")
 );
