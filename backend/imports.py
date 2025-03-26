@@ -332,7 +332,7 @@ def insert_into_enrolments_db(conn, df):
                     INSERT INTO enrolments (student_id, enrolment_key, membership,
                                             enrolment_start, enrolment_end, total_hold_length)
                     VALUES (%s, %s, %s, %s, %s, %s)
-                    ON CONFLICT (student_id, enrolment_key) DO UPDATE
+                    ON CONFLICT (student_id) DO UPDATE
                     SET membership = EXCLUDED.membership,
                         enrolment_start = EXCLUDED.enrolment_start,
                         enrolment_end = EXCLUDED.enrolment_end,
