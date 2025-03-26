@@ -15,7 +15,6 @@ CREATE TABLE "student_information" (
     "student_link" VARCHAR(500),
     "delivery_id" BIGINT,
     "year" BIGINT NOT NULL,
-    FOREIGN KEY ("enrolment_key") REFERENCES "enrolment_status"("enrolment_key") ON DELETE SET NULL,
     FOREIGN KEY ("delivery_id") REFERENCES "delivery"("delivery_id") ON DELETE SET NULL
 );
 
@@ -37,7 +36,7 @@ CREATE TABLE "assessments" (
     "assessment_id" BIGINT NOT NULL PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     "date_taken" DATE NOT NULL,
     "assessment_title" VARCHAR (255) NOT NULL,
-    "assessment_level" BIGINT NOT NULL,
+    "assessment_level" VARCHAR (255) NOT NULL,
     "score" BIGINT NOT NULL
 );
 
