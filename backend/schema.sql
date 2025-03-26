@@ -76,8 +76,7 @@ CREATE TABLE "student_education_stats" (
     "total_lp_skills_mastered" BIGINT,
     "total_lp_skills" BIGINT,
     "skills_mastered_percent" DECIMAL(5,2),
-    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
-    FOREIGN KEY ("delivery_id") REFERENCES "delivery"("delivery_id") ON DELETE SET NULL
+    FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE
 );
 
 CREATE TABLE holds (
