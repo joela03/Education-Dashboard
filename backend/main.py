@@ -72,6 +72,7 @@ if __name__ == "__main__":
         joined_enrolment_df.rename(columns={"Student First Name": "Student",
                 "Student First Name Link": "Student Link"}, inplace=True)
         joined_enrolment_df = add_mathnasium_id_column(joined_enrolment_df)
+        joined_enrolment_df.to_csv('enrolment.csv', index=False)
 
         pre_enrolment_df.rename(columns={"Student First Name": "Student",
                 "Student First Name Link": "Student Link"}, inplace=True)
