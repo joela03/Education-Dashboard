@@ -12,11 +12,12 @@ def get_username_data(username: str):
     curs.execute("""SELECT salt, password_hash
                 FROM users
                 WHERE username = (%s)""", (username,))
-    data = curs.fetchall()
+    data = curs.fetchone()
+
     curs.close()
     conn.close()
 
-    return data
+    return dict(data)
 
 def get_student_attendance():
     """Queries the database for students that haven't attended"""
