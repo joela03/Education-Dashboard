@@ -242,20 +242,18 @@ def insert_preenroled_into_students(conn, df):
                 with conn.cursor() as curs:
                     curs.execute("""
                     INSERT INTO student_information (name, mathnasium_id, student_link,
-                            delivery_id, year, enrolment_key)
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                            delivery_id, year)
+                    VALUES (%s, %s, %s, %s, %s)
                     ON CONFLICT (mathnasium_id) DO UPDATE 
                     SET name = EXCLUDED.name,
                         student_link = EXCLUDED.student_link,
                         delivery_id = EXCLUDED.delivery_id,
-                        year = EXCLUDED.year,
-                    enrolment_key = EXCLUDED.enrolment_key;
+                        year = EXCLUDED.year;
                 """, (row.get('Student'),
                     row.get('Mathnasium ID'),
                     row.get('Student Link'),
                     delivery_id,
-                    0 if row.get('Year') == "Reception" else (13 if row.get('Year') == "College" else row.get('Year')),
-                    enrolment_key,
+                    0 if row.get('Year') == "Reception" else (13 if row.get('Year') == "College" else row.get('Year'))
                     ))
 
         conn.commit()
@@ -380,7 +378,7 @@ def insert_into_enrolments_db(conn, df):
                         enrolment_key,
                         row.get("Membership Type"),
                         row.get("Enrollment Start"),
-                        row.get("Enrollment End"),
+                        row.get("Enrolment End"),
                         row.get("Total Hold Length")
                     ))
 
