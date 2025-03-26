@@ -364,7 +364,7 @@ def insert_into_enrolments_db(conn, df):
                         row.get("Membership Type"),
                         row.get("Enrollment Start"),
                         row.get("Enrolment End"),
-                        row.get("Total Hold Length"),
+                        row.get("Total Holds Length"),
                         existing_record[0]
                     ))
                 else:
@@ -379,7 +379,7 @@ def insert_into_enrolments_db(conn, df):
                         row.get("Membership Type"),
                         row.get("Enrollment Start"),
                         row.get("Enrolment End"),
-                        row.get("Total Hold Length")
+                        row.get("Total Holds Length")
                     ))
 
         conn.commit()
