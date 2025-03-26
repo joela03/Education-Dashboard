@@ -236,9 +236,6 @@ def insert_preenroled_into_students(conn, df):
                 delivery_type = row.get('Current Delivery Method')
                 delivery_id = get_status_key('delivery', delivery_type)
 
-                enrolment_status = row.get('Current Status')
-                enrolment_key = get_status_key('enrolment', enrolment_status)
-
                 with conn.cursor() as curs:
                     curs.execute("""
                     INSERT INTO student_information (name, mathnasium_id, student_link,
@@ -264,62 +261,49 @@ def insert_preenroled_into_students(conn, df):
         return None
     
 def insert_into_assessments_db(conn, df):
-    """Inserts assessments into the assessment database"""
-
+    """Inserts assessments into assessment db"""
     try:
-        with conn.cursor() as curs:
-            for _, row in df.iterrows():
-                student_id = get_id_from_name(conn, row.get("Student"))
-                if not student_id:
-                    print(f"Skipping assessment entry for missing student ID: {row.get('Student')}")
-                    continue
+        for _, row in df.iterrows():
+            student_id = get_id_from_name(conn, row.get("Student"))
+            if not student_id:
+                print(f"Skipping assessment entry for missing student ID: {row.get('Student')}")
+                continue
 
-                score = percentage_to_float(row.get("Score"))
+            score = percentage_to_float(row.get("Score"))
 
-                # Check if the assessment already exists
+            with conn.cursor() as curs:
+                # Insert into assessments table
                 curs.execute("""
-                    SELECT assessment_id FROM assessments 
-                    WHERE date_taken = %s AND assessment_title = %s AND assessment_level = %s;
-                """, (row.get("Date Taken"), row.get("Assessment Title"), row.get("Assessment Level")))
+                    INSERT INTO assessments (date_taken, assessment_title,
+                                            assessment_level, score)
+                    VALUES (%s, %s, %s, %s)
+                    ON CONFLICT (date_taken, assessment_title, assessment_level) DO UPDATE
+                    SET date_taken = EXCLUDED.date_taken,
+                        assessment_title = EXCLUDED.assessment_title,
+                        assessment_level = EXCLUDED.assessment_level,
+                        score = EXCLUDED.score
+                    RETURNING assessment_id;
+                """, (
+                    row.get("Date Taken"),
+                    row.get("Assessment Title"),
+                    row.get("Assessment Level"),
+                    score
+                ))
 
-                existing_record = curs.fetchone()
+                # Extract assessment_id
+                result = curs.fetchone()
+                if result:
+                    assessment_id = result[0]
 
-                if existing_record:
-                    # Update existing assessment
-                    assessment_id = existing_record[0]
-                    curs.execute("""
-                        UPDATE assessments 
-                        SET score = %s
-                        WHERE assessment_id = %s;
-                    """, (score, assessment_id))
-                else:
-                    # Insert new assessment
-                    curs.execute("""
-                        INSERT INTO assessments (date_taken, assessment_title, assessment_level, score)
-                        VALUES (%s, %s, %s, %s)
-                        RETURNING assessment_id;
-                    """, (
-                        row.get("Date Taken"),
-                        row.get("Assessment Title"),
-                        row.get("Assessment Level"),
-                        score
-                    ))
-
-                    assessment_id = curs.fetchone()[0]
-
-                # Insert into assessments_students if it doesn't exist
-                curs.execute("""
-                    SELECT 1 FROM assessments_students WHERE assessment_id = %s AND student_id = %s;
-                """, (assessment_id, student_id))
-
-                if not curs.fetchone():
+                    # Insert into assessments_students table
                     curs.execute("""
                         INSERT INTO assessments_students (assessment_id, student_id)
-                        VALUES (%s, %s);
+                        VALUES (%s, %s)
+                        ON CONFLICT DO NOTHING;
                     """, (assessment_id, student_id))
 
-        conn.commit()
-
+            conn.commit()
+    
     except psycopg2.Error as e:
         print(f"An error occurred: {e}")
         conn.rollback()
@@ -327,12 +311,12 @@ def insert_into_assessments_db(conn, df):
 
 def insert_into_enrolments_db(conn, df):
     """Inserts enrolments into the enrolments database."""
-
+    
     try:
         if df is None or df.empty:
             print("DataFrame is empty or None, skipping insertion.")
             return None
-
+        
         with conn.cursor() as curs:
             for _, row in df.iterrows():
                 student_id = get_student_id(conn, row.get("Mathnasium ID"))
@@ -343,47 +327,28 @@ def insert_into_enrolments_db(conn, df):
                 enrolment_status = row.get("Current Status")
                 enrolment_key = get_status_key("enrolment", enrolment_status)
 
-                # Check if enrolment already exists
+                # Insert into enrolments table
                 curs.execute("""
-                    SELECT enrolment_id FROM enrolments 
-                    WHERE student_id = %s AND enrolment_key = %s;
-                """, (student_id, enrolment_key))
-
-                existing_record = curs.fetchone()
-
-                if existing_record:
-                    # Update existing record
-                    curs.execute("""
-                        UPDATE enrolments 
-                        SET membership = %s,
-                            enrolment_start = %s,
-                            enrolment_end = %s,
-                            total_hold_length = %s
-                        WHERE enrolment_id = %s;
-                    """, (
-                        row.get("Membership Type"),
-                        row.get("Enrollment Start"),
-                        row.get("Enrolment End"),
-                        row.get("Total Holds Length"),
-                        existing_record[0]
-                    ))
-                else:
-                    # Insert new record
-                    curs.execute("""
-                        INSERT INTO enrolments (student_id, enrolment_key, membership, 
-                                                enrolment_start, enrolment_end, total_hold_length)
-                        VALUES (%s, %s, %s, %s, %s, %s);
-                    """, (
-                        student_id,
-                        enrolment_key,
-                        row.get("Membership Type"),
-                        row.get("Enrollment Start"),
-                        row.get("Enrolment End"),
-                        row.get("Total Holds Length")
-                    ))
+                    INSERT INTO enrolments (student_id, enrolment_key, membership,
+                                            enrolment_start, enrolment_end, total_hold_length)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (student_id, enrolment_key) DO UPDATE
+                    SET membership = EXCLUDED.membership,
+                        enrolment_start = EXCLUDED.enrolment_start,
+                        enrolment_end = EXCLUDED.enrolment_end,
+                        total_hold_length = EXCLUDED.total_hold_length
+                    RETURNING enrolment_id;
+                """, (
+                    student_id,
+                    enrolment_key,
+                    row.get("Membership Type"),
+                    row.get("Enrollment Start"),
+                    row.get("Enrolment End"),
+                    row.get("Total Holds Length")
+                ))
 
         conn.commit()
-
+    
     except psycopg2.Error as e:
         print(f"An error occurred: {e}")
         conn.rollback()
