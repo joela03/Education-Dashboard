@@ -69,7 +69,6 @@ def import_students_to_database(conn, df):
                 student_link = EXCLUDED.student_link,
                 delivery_id = EXCLUDED.delivery_id,
                 year = EXCLUDED.year
-                enrolment_key = EXCLUDED.enrolment_key
             RETURNING student_id;
         """, (row['Student'],
             row.get('Mathnasium ID'),
@@ -77,7 +76,12 @@ def import_students_to_database(conn, df):
             delivery_id,
             0 if row['Year'] == "Reception" else (13 if row['Year'] == "College" else row['Year']),
             ))
-        student_id = curs.fetchone()[0]
+
+        result = curs.fetchone()
+        if result:
+            student_id = result['student_id']
+        else:
+            raise ValueError(f"Failed to retrieve student_id for student: {row['Student']}")
         conn.commit()
 
         # Insert into accounts table
