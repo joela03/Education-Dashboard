@@ -195,7 +195,9 @@ def verify_password(stored_salt: str, stored_hash: str, password: str) -> bool:
     return stored_hash == hash_bytes.hex()
 
 def insert_user(username: str, password: str, conn):
-    salt, password_hash = hash_password(password)
+    """Inserts user information to the database"""
+    hashed_data = hash_password(password)
+    salt, password_hash = hashed_data["salt"], hashed_data["password_hash"]
     
     try:
         with conn.cursor() as cur:
