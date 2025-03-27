@@ -128,7 +128,7 @@ if __name__ == "__main__":
         driver.quit()
 
     conn = get_db_connection()
-    
+
     import_students_to_database(conn, merged_df)
 
     insert_preenroled_into_students(conn, pre_enrolment_df)
@@ -138,4 +138,3 @@ if __name__ == "__main__":
     insert_into_enrolments_db(conn, joined_enrolment_df)
 
     insert_into_holds_db(conn, hold_df)
-
