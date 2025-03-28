@@ -1,24 +1,24 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation";
 import { AppSidebar } from "@/components/app-sidebar"
 import { DataTable } from "@/components/data-table"
-import { useRouter } from "next/navigation";
-import { attendanceColumns, AttendanceData, progressCheckColumns,
-        ProgressCheckData,planPaceColumns, PlanPaceData,
-        checkupColumns, CheckupData } from "@/configs/tableConfigs"
-import { Card, CardHeader, CardBody } from '@components/ui/card';
+import { SectionCards } from "@/components/section-cards";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar"
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+import { attendanceColumns, AttendanceData, progressCheckColumns,
+        ProgressCheckData,planPaceColumns, PlanPaceData,
+        checkupColumns, CheckupData } from "@/configs/tableConfigs"
 
 export default function Page() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -46,7 +46,7 @@ export default function Page() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/login");
+      router.push("/dashboard");
     } else {
       setIsAuthenticated(true)
     }
@@ -71,7 +71,7 @@ export default function Page() {
     return null;
   }
 
-  return (   
+  return (
     <SidebarProvider>
       <AppSidebar onSelectPage={setSelectedPage} selectedPage={selectedPage} />
       <SidebarInset>
@@ -89,20 +89,8 @@ export default function Page() {
           </Breadcrumb>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
-          
-          {selectedPage === "/dashboard/risk/general" ? (
-            <div>
-              {/* Add Shadcn Cards for the general route */}
-              <Card>
-                <CardHeader>
-                  <h2>General Risk Information</h2>
-                </CardHeader>
-                <CardBody>
-                  <p>Content for the General Risk section</p>
-                  {/* Additional content */}
-                </CardBody>
-              </Card>
-            </div>
+          {selectedPage === "/dashboard/general" ? (
+            <SectionCards />
           ) : selectedPage === "/dashboard/risk/attendance" ? (
             loading ? (
               <p>Loading Attendance data...</p>
