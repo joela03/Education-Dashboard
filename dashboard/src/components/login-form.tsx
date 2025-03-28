@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 async function login(username: string, password: string) {
   try {
@@ -37,14 +38,16 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
+  const router = useRouter();
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
-
+  
     try {
       await login(username, password);
       alert("Login successful!");
-      window.location.href = "/dashboard";
+      router.push("/dashboard");
     } catch (err) {
       setError("Invalid username or password");
     }
