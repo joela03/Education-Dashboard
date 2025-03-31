@@ -13,64 +13,57 @@ export function SectionCards() {
     <div className="grid grid-cols-1 gap-4 px-4 lg:grid-cols-3 lg:px-6">
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>Total Students</CardDescription>
+          <CardDescription>Student Count</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums">
-            $1,250.00
+            Total Students: 
           </CardTitle>
-          <div className="absolute right-4 top-4">
-
-          </div>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="flex gap-2 font-medium">
             Enroled:
           </div>
           <div className="flex gap-2 text-bold font-medium">
-            On-hold:
+            On-Hold:
           </div>
           <div className="flex gap-2 font-medium">
-            Pre-enroled:
+            Pre-Enroled:
           </div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>New Customers</CardDescription>
+          <CardDescription>March Stats</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums">
-            1,234
+            New enrolments: 
           </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingDownIcon className="size-3" />
-              -20%
-            </Badge>
-          </div>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="flex gap-2 font-medium">
-            Down 20% this period <TrendingDownIcon className="size-4" />
+            Average Attendance:
           </div>
-          <div className="text-muted-foreground">Acquisition needs attention</div>
+          <div className="flex gap-2 font-medium">
+            Average Score:
+          </div>
+          <div className="text-muted-foreground"></div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader className="relative">
-          <CardDescription>Active Accounts</CardDescription>
+          <CardDescription>Education Stats</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums">
-            45,678
+            Potential Interventions:
           </CardTitle>
-          <div className="absolute right-4 top-4">
-            <Badge variant="outline" className="flex gap-1 rounded-lg text-xs">
-              <TrendingUpIcon className="size-3" />
-              +12.5%
-            </Badge>
-          </div>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1 text-sm">
           <div className="flex gap-2 font-medium">
-            Strong user retention <TrendingUpIcon className="size-4" />
+            Students that need a checkup
           </div>
-          <div className="text-muted-foreground">Engagement exceeds targets</div>
+          <div className="flex gap-2 font-medium">
+            Students that need a Progress Check:
+          </div>
+          <div className="flex gap-2 font-medium">
+            Students with poor attendance 
+          </div>
         </CardFooter>
       </Card>
     </div>
