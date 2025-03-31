@@ -23,7 +23,7 @@ import { attendanceColumns, AttendanceData, progressCheckColumns,
 export default function Page() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
-  const [selectedPage, setSelectedPage] = useState("default")
+  const [selectedPage, setSelectedPage] = useState("/dashboard/general")
   const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([])
   const [PlanPaceData, setPlanPaceData] = useState<PlanPaceData[]>([])
   const [CheckupData, setCheckupData] = useState<CheckupData[]>([])
