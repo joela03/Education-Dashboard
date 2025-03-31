@@ -10,7 +10,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[]
@@ -33,7 +32,6 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
 
   return (
     <div className="flex flex-col h-full">
-      <ScrollArea className="flex-1 w-full whitespace-nowrap rounded-md border">
         <div className="overflow-auto rounded-lg border border-gray-200 shadow-lg">
           <Table className="w-full table-auto">
             <TableHeader>
@@ -81,8 +79,5 @@ export function DataTable<TData>({ columns, data }: DataTableProps<TData>) {
             </TableBody>
           </Table>
         </div>
-        <ScrollBar orientation="horizontal" />
-        <ScrollBar orientation="vertical" />
-      </ScrollArea>
     </div>
   )}
