@@ -328,7 +328,9 @@ def insert_into_enrolments_db(conn, df):
                     continue
                 
                 enrolment_status = row.get("Current Status")
+                print(f'Current status: {enrolment_status}')
                 enrolment_key = get_status_key("enrolment", enrolment_status)
+                print(f'Enrolment key from status: {enrolment_status} is {enrolment_key}')
 
                 # Insert into enrolments table
                 curs.execute("""
