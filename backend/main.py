@@ -70,13 +70,14 @@ if __name__ == "__main__":
         joined_enrolment_df = add_mathnasium_id_column(joined_enrolment_df)
         joined_enrolment_df.to_csv('enrolment.csv', index=0)
         
-        pre_enrolment_df['Student First Name'] = pre_enrolment_df.apply(lambda row: row['Student First Name'] +
-                                        ' ' + row['Student Last Name'], axis=1)
-        pre_enrolment_df.rename(columns={"Student First Name": "Student",
-                "Student First Name Link": "Student Link"}, inplace=True)
-        pre_enrolment_df.columns = [col.replace("\n", " ").strip() for col in pre_enrolment_df.columns]
-        pre_enrolment_df.columns = pre_enrolment_df.columns.str.replace("\n", " ", regex=True)
-        pre_enrolment_df = add_mathnasium_id_column(pre_enrolment_df)
+        if not pre_enrolment_df.empty:
+            pre_enrolment_df['Student First Name'] = pre_enrolment_df.apply(lambda row: row['Student First Name'] +
+                                            ' ' + row['Student Last Name'], axis=1)
+            pre_enrolment_df.rename(columns={"Student First Name": "Student",
+                    "Student First Name Link": "Student Link"}, inplace=True)
+            pre_enrolment_df.columns = [col.replace("\n", " ").strip() for col in pre_enrolment_df.columns]
+            pre_enrolment_df.columns = pre_enrolment_df.columns.str.replace("\n", " ", regex=True)
+            pre_enrolment_df = add_mathnasium_id_column(pre_enrolment_df)
 
         # Scrape hold table
         select_hold_report(driver)
