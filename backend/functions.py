@@ -391,7 +391,7 @@ def get_hold_dates(holds: str) -> datetime:
 
         # Ensure date range
         if " - " not in date_part:
-            return None
+            return
 
         split_dates = date_part.split(" - ")
         hold_start_date = datetime.strptime(split_dates[0].strip(), "%d/%m/%y")
