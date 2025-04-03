@@ -4,7 +4,8 @@ from datetime import datetime
 
 import unittest
 from unittest.mock import patch
-from functions import (convert_col_to_dt, percentage_to_float, ensure_list)
+from functions import (convert_col_to_dt, percentage_to_float, ensure_list,
+                       get_hold_dates)
 from imports import get_status_key
 
 
@@ -88,3 +89,10 @@ def test_get_status_key():
     assert get_status_key("enrolment", 456) is None
     assert get_status_key([], {}) is None
     assert get_status_key("delivery", []) is None
+    
+class TestGetHoldDates(unittest.TestCase):
+    def test_single_case(self):
+        holds = """03/04/25 - 16/04/25
+        All holds (2)"""
+        expected = (datetime(2025, 4, 3), datetime(2025, 4, 16))
+        self.assertEqual(get_hold_dates(holds), expected)
