@@ -55,11 +55,30 @@ def get_progress_check():
         LEFT JOIN student_education_stats AS ses ON si.student_id = ses.student_id
         LEFT JOIN enrolments AS e ON si.student_id = e.student_id
         LEFT JOIN enrolment_status AS es ON e.enrolment_key = es.enrolment_key
-        WHERE (ses.last_assessment < CURRENT_DATE - INTERVAL '3 months'
-               AND ses.last_progress_check < CURRENT_DATE - INTERVAL '3 months')
-           OR (ses.skills_mastered_percent > 45
-               AND ses.last_progress_check < CURRENT_DATE - INTERVAL '3 months')
-    """)
+        LEFT JOIN LATERAL (
+            SELECT a.assessment_id, a.assessment_title, a.assessment_level,
+                a.date_taken
+            FROM 
+                assessments_students ast
+            JOIN 
+                assessments a ON ast.assessment_id = a.assessment_id
+            WHERE 
+                ast.student_id = si.student_id
+                AND a.assessment_level ~ '^[0-9]+$'
+            ORDER BY 
+                a.date_taken DESC
+            LIMIT 1
+        ) a ON true
+        WHERE 
+            ((a.date_taken < CURRENT_DATE - INTERVAL '3 months'
+                    AND ses.last_progress_check < CURRENT_DATE - INTERVAL '3 months')
+                OR
+                (ses.skills_mastered_percent > 45
+                    AND ses.last_progress_check < CURRENT_DATE - INTERVAL '3 months')
+            )
+        ORDER BY 
+            si.name
+        """)
     
     data = curs.fetchall()
     curs.close()
@@ -79,9 +98,28 @@ def get_checkup_data():
         LEFT JOIN student_education_stats AS ses ON si.student_id = ses.student_id
         LEFT JOIN enrolments AS e ON si.student_id = e.student_id
         LEFT JOIN enrolment_status AS es ON e.enrolment_key = es.enrolment_key
-        WHERE ses.skills_mastered_percent > 85
-           OR ses.last_assessment < CURRENT_DATE - INTERVAL '24 weeks'
-    """)
+        LEFT JOIN LATERAL (
+            SELECT a.assessment_id, a.assessment_title, a.assessment_level,
+                a.date_taken
+            FROM 
+                assessments_students ast
+            JOIN 
+                assessments a ON ast.assessment_id = a.assessment_id
+            WHERE 
+                ast.student_id = si.student_id
+                AND a.assessment_level ~ '^[0-9]+$'
+            ORDER BY 
+                a.date_taken DESC
+            LIMIT 1
+        ) a ON true
+        WHERE 
+            ((a.date_taken < CURRENT_DATE - INTERVAL '6 months')
+                OR
+                (ses.skills_mastered_percent > 90)
+            )
+        ORDER BY 
+            si.name
+        """)
     
     data = curs.fetchall()
     curs.close()
