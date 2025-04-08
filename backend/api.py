@@ -3,11 +3,10 @@
 from dotenv import load_dotenv
 import os
 from database_functions import (get_student_attendance, get_progress_check, get_checkup_data,
-                                get_plan_pace, get_username_data)
+                                get_plan_pace, get_username_data, get_care_call)
 from imports import verify_password
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from pydantic import BaseModel
 import jwt
 from datetime import datetime, timedelta
 
@@ -21,10 +20,6 @@ CORS(app)
 def endpoint_index():
     """Sets up index route"""
     return jsonify({"message": "Welcome to the Mathnasium API"})
-
-class LoginRequest(BaseModel):
-    username: str
-    password: str
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -107,6 +102,15 @@ def endpoint_get_planpace():
 
     return jsonify(students), 200
 
+@app.route("/carecall", methods=["GET"])
+def endpoint_get_care_call():
+
+    care_call_info = get_care_call()
+
+    if not care_call_info:
+        return {"error": "Care Call informatin not found"}, 404
+
+    return jsonify(care_call_info), 200
 
 if __name__ == "__main__":
     app.config['TESTING'] = True
