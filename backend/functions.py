@@ -114,6 +114,12 @@ def select_hold_report(driver):
     """Selects reports for accounts on hold"""
 
     driver.get("https://radius.mathnasium.com/Holds/HoldsReport")
+    current_date = datetime.now()
+    current_date_str = dt_to_string(current_date)
+
+    # Subtracts 4 weeks from current date
+    str_start_date = subtracted_date(current_date_str, 183)
+    input_date(driver, str_start_date, "ReportStart")
     select_report_count(driver, "gridHoldsReport", 3)
 
 def subtracted_date(date, days: int):
