@@ -4,7 +4,7 @@ import hashlib
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
-from functions import (safe_date, percentage_to_float, ensure_list)
+from functions import (safe_date, percentage_to_float, ensure_list, )
 
 def get_db_connection():
     """Sets up connection with database"""
@@ -391,8 +391,8 @@ def insert_into_holds_db(conn, df):
                 # Insert into holds table
                 curs.execute("""
                     INSERT INTO holds (student_id, hold_start_date, hold_end_date,
-                                       current_hold_length)
-                    VALUES (%s, %s, %s, %s)
+                                       current_hold_length, total_hold_length)
+                    VALUES (%s, %s, %s, %s, %s)
                     ON CONFLICT (student_id, hold_start_date) DO UPDATE
                     SET hold_end_date = EXCLUDED.hold_end_date,
                         current_hold_length = EXCLUDED.current_hold_length;
@@ -400,7 +400,8 @@ def insert_into_holds_db(conn, df):
                     student_id,  
                     row.get("Hold start date"),
                     row.get("Hold end date"),
-                    row.get("Current Hold Length")
+                    row.get("Current Hold Length"),
+                    row.get("Total Hold Lentgh")
                 ))
 
         conn.commit()
