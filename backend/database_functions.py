@@ -147,3 +147,43 @@ def get_plan_pace():
     conn.close()
     
     return data
+
+def get_care_call():
+    "Query to retrieve useful information for a carecall"
+
+    conn = get_db_connection()
+    curs = get_cursor(conn)
+
+    curs.execute("""
+        SELECT si.name, es.enrolment_status, si.student_link,
+            ses.skills_mastered_percent, ses.skills_assigned,
+            ses.skills_mastered, e.total_hold_length,
+            a.assessment_title as last_core_assessment,
+            a.date_taken as last_core_assessment_date,
+            a.score as last_core_assessment_score
+        FROM student_information AS si
+        LEFT JOIN student_education_stats AS ses ON si.student_id = ses.student_id
+        LEFT JOIN enrolments AS e ON si.student_id = e.student_id
+        LEFT JOIN enrolment_status AS es ON e.enrolment_key = es.enrolment_key
+        LEFT JOIN LATERAL (
+            SELECT 
+                a.assessment_title, 
+                a.date_taken,
+                a.score
+            FROM 
+                assessments_students ast
+            JOIN 
+                assessments a ON ast.assessment_id = a.assessment_id
+            WHERE 
+                ast.student_id = si.student_id
+                AND a.assessment_level ~ '^[0-9]+$'
+            ORDER BY 
+                a.date_taken DESC
+            LIMIT 1
+        ) a ON true
+        """)
+    data = curs.fetchall()
+    curs.close()
+    conn.close()
+    
+    return data
