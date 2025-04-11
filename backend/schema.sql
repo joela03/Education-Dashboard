@@ -83,8 +83,7 @@ CREATE TABLE holds (
     "student_id" BIGINT NOT NULL,
     "hold_start_date" DATE NOT NULL,
     "hold_end_date" DATE NOT NULL,
-    "current_hold_length" VARCHAR(255),
-    "total_hold_length" VARCHAR(255),
+    "current_hold_length" VARCHAR(255)
     FOREIGN KEY ("student_id") REFERENCES "student_information"("student_id") ON DELETE CASCADE,
     UNIQUE ("student_id", "hold_start_date")
 );

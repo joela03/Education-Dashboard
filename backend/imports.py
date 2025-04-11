@@ -391,7 +391,7 @@ def insert_into_holds_db(conn, df):
                 # Insert into holds table
                 curs.execute("""
                     INSERT INTO holds (student_id, hold_start_date, hold_end_date,
-                                       current_hold_length, total_hold_length)
+                                       current_hold_length)
                     VALUES (%s, %s, %s, %s, %s)
                     ON CONFLICT (student_id, hold_start_date) DO UPDATE
                     SET hold_end_date = EXCLUDED.hold_end_date,
