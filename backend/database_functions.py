@@ -149,7 +149,7 @@ def get_plan_pace():
     return data
 
 def get_care_call():
-    "Query to retrieve useful information for a carecall"
+    """Query to retrieve useful information for a carecall"""
 
     conn = get_db_connection()
     curs = get_cursor(conn)
@@ -187,3 +187,41 @@ def get_care_call():
     conn.close()
     
     return data
+
+def get_enrolment_stats():
+    """Queries for student counts"""
+
+    conn = get_db_connection()
+    curs = get_cursor(conn)
+
+    curs.execute("""
+        SELECT COUNT(*)
+        FROM enrolments
+        WHERE enrolment_status = 0;
+    """)
+
+    enrolment_count = curs.fetchone()[0]
+
+    curs.execute("""
+        SELECT COUNT(*)
+        FROM enrolments
+        WHERE enrolment_status = 1;
+    """)
+
+    hold_count = curs.fetchone()[0]
+
+    curs.execute("""
+        SELECT COUNT(*)
+        FROM enrolments
+        WHERE enrolment_status = 2;
+    """)
+
+    pre_enroled_count = curs.fetchone()[0]
+
+    curs.close()
+
+    return {
+        "active_enrolment": enrolment_count,
+        "on_hold": hold_count,
+        "pre_enroled": pre_enroled_count
+    }
