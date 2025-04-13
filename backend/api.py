@@ -3,7 +3,7 @@
 from dotenv import load_dotenv
 import os
 from database_functions import (get_student_attendance, get_progress_check, get_checkup_data,
-                                get_plan_pace, get_username_data, get_care_call)
+                                get_plan_pace, get_username_data, get_care_call, get_enrolment_stats)
 from imports import verify_password
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -111,6 +111,17 @@ def endpoint_get_care_call():
         return {"error": "Care Call informatin not found"}, 404
 
     return jsonify(care_call_info), 200
+
+@app.route("/enrolment_stats", methods=["GET"])
+def endpoint_get_enrolment_stats():
+
+    enrolment_stats = get_enrolment_stats()
+
+    if not enrolment_stats:
+        return {"error": "Enrolment informatin not found"}, 404
+
+    return jsonify(enrolment_stats), 200
+
 
 if __name__ == "__main__":
     app.config['TESTING'] = True
