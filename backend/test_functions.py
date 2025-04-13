@@ -1,12 +1,12 @@
 import pytest
 import pandas as pd
 from datetime import datetime
-
+import psycopg2
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from functions import (convert_col_to_dt, percentage_to_float, ensure_list,
                        get_hold_dates)
-from imports import get_status_key
+from imports import get_status_key, get_student_id
 
 
 
@@ -96,3 +96,70 @@ class TestGetHoldDates(unittest.TestCase):
         All holds (2)"""
         expected = (datetime(2025, 4, 3), datetime(2025, 4, 16))
         self.assertEqual(get_hold_dates(holds), expected)
+
+class TestGetStudentId(unittest.TestCase):
+    
+    def setUp(self):
+        """Set up a mock database connection for testing"""
+        self.mock_conn = MagicMock()
+        self.mock_cursor = MagicMock()
+        self.mock_conn.cursor.return_value = self.mock_cursor
+    
+    def test_valid_mathnasium_id(self):
+        """Test with a valid mathnasium_id that exists in database"""
+        # Setup mock return value
+        expected_id = 123
+        self.mock_cursor.fetchone.return_value = (expected_id,)
+        
+        # Call function
+        result = get_student_id(self.mock_conn, 456)
+        
+        # Assertions
+        self.assertEqual(result, expected_id)
+        self.mock_cursor.execute.assert_called_once_with(
+            "SELECT student_id FROM student_information WHERE mathnasium_id = %s",
+            (456,)
+        )
+    
+    def test_nonexistent_mathnasium_id(self):
+        """Test with a mathnasium_id that doesn't exist"""
+        # Setup mock return value
+        self.mock_cursor.fetchone.return_value = None
+        
+        # Call function
+        result = get_student_id(self.mock_conn, 999)
+        
+        # Assertions
+        self.assertIsNone(result)
+    
+    def test_null_mathnasium_id(self):
+        """Test with None as mathnasium_id"""
+        with self.assertRaises(psycopg2.Error):
+            get_student_id(self.mock_conn, None)
+    
+    def test_database_error(self):
+        """Test when database operation fails"""
+        # Setup mock to raise exception
+        self.mock_cursor.execute.side_effect = psycopg2.Error("DB error")
+        
+        # Call function
+        result = get_student_id(self.mock_conn, 123)
+        
+        # Assertions
+        self.assertIsNone(result)
+        self.mock_conn.rollback.assert_called_once()
+    
+    def test_multiple_calls(self):
+        """Test multiple consecutive calls"""
+        # First call
+        self.mock_cursor.fetchone.return_value = (111,)
+        result1 = get_student_id(self.mock_conn, 456)
+        self.assertEqual(result1, 111)
+        
+        # Second call
+        self.mock_cursor.fetchone.return_value = None
+        result2 = get_student_id(self.mock_conn, 789)
+        self.assertIsNone(result2)
+        
+
+        self.assertEqual(self.mock_cursor.execute.call_count, 2)
