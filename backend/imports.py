@@ -225,6 +225,7 @@ def get_student_id(conn, mathnasium_id: int) -> int:
                 (mathnasium_id,)
             )
             result = curs.fetchone()
+            print(result)
             return result[0] if result else None
     except psycopg2.Error as e:
         print(f"An error occured: {e}")
@@ -338,7 +339,8 @@ def insert_into_enrolments_db(conn, df):
                                             enrolment_start, enrolment_end, total_hold_length)
                     VALUES (%s, %s, %s, %s, %s, %s)
                     ON CONFLICT (student_id) DO UPDATE
-                    SET membership = EXCLUDED.membership,
+                    SET enrolment_key = EXCLUDED.enrolment_key,
+                        membership = EXCLUDED.membership,
                         enrolment_start = EXCLUDED.enrolment_start,
                         enrolment_end = EXCLUDED.enrolment_end,
                         total_hold_length = EXCLUDED.total_hold_length
