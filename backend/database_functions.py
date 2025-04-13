@@ -234,8 +234,9 @@ def get_education_level_stats():
     curs = get_cursor(conn)
 
     curs.execute("""
-        SELECT si.student_id, si.year, latest_assessment.assessment_level
+        SELECT si.student_id, si.year, latest_assessment.assessment_level, e.enrolment_start
         FROM student_information si
+        JOIN enrolments as e ON e.student_id = si.student_id
         LEFT JOIN LATERAL (
             SELECT a.assessment_level
             FROM assessments_students ast
