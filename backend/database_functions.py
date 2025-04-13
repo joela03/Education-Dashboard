@@ -197,26 +197,27 @@ def get_enrolment_stats():
     curs.execute("""
         SELECT COUNT(*)
         FROM enrolments
-        WHERE enrolment_status = 0;
+        WHERE enrolment_key  = 0;
     """)
 
-    enrolment_count = curs.fetchone()[0]
+    enrolment_count = curs.fetchone()["count"]
+    print(enrolment_count)
 
     curs.execute("""
         SELECT COUNT(*)
         FROM enrolments
-        WHERE enrolment_status = 1;
+        WHERE enrolment_key  = 1;
     """)
 
-    hold_count = curs.fetchone()[0]
+    hold_count = curs.fetchone()["count"]
 
     curs.execute("""
         SELECT COUNT(*)
         FROM enrolments
-        WHERE enrolment_status = 2;
+        WHERE enrolment_key  = 2;
     """)
 
-    pre_enroled_count = curs.fetchone()[0]
+    pre_enroled_count = curs.fetchone()["count"]
 
     curs.close()
 
