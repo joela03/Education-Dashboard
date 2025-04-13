@@ -226,3 +226,30 @@ def get_enrolment_stats():
         "on_hold": hold_count,
         "pre_enroled": pre_enroled_count
     }
+
+def get_education_level_stats():
+    """Pulls stats on education"""
+
+    conn = get_db_connection()
+    curs = get_cursor(conn)
+
+    curs.execute("""
+        SELECT si.student_id, si.year, latest_assessment.assessment_level
+        FROM student_information si
+        LEFT JOIN LATERAL (
+            SELECT a.assessment_level
+            FROM assessments_students ast
+            JOIN assessments a ON ast.assessment_id = a.assessment_id
+            WHERE ast.student_id = si.student_id
+            AND a.assessment_level ~ '^[0-9]+$'
+            ORDER BY a.date_taken DESC
+            LIMIT 1
+        ) latest_assessment ON true
+        WHERE latest_assessment.assessment_level IS NOT NULL;
+    """)
+
+    data = curs.fetchall()
+
+    curs.close()
+
+    return data
