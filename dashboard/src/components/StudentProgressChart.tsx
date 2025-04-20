@@ -52,12 +52,14 @@ export function StudentProgressChart({ data }: { data: any[] }) {
     filteredStudents.forEach(student => {
       if (student.assessment_level < student.year) {
         categories.behind++;
-      } else if (student.assessment_level === student.year) {
+      } else if (student.assessment_level == student.year) {
         categories.atLevel++;
       } else {
         categories.ahead++;
       }
     });
+
+    console.log(categories);
 
     return [
       { name: "Behind", value: categories.behind, color: "#ef4444" },
