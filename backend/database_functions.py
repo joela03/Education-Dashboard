@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from imports import get_cursor, get_db_connection
 
 def get_username_data(username: str):
@@ -219,12 +221,25 @@ def get_enrolment_stats():
 
     pre_enroled_count = curs.fetchone()["count"]
 
+    first_day_prev_month = datetime.now().replace(day=1) - relativedelta(months=1)
+    first_day_curr_month = datetime.now().replace(day=1)
+
+    curs.execute("""
+        SELECT COUNT(*)
+        FROM enrolments
+        WHERE enrolment_start >= %s
+        AND enrolment_start < %s
+    """, (first_day_prev_month, first_day_curr_month))
+
+    previous_month_enrolments = curs.fetchone()["count"]
+
     curs.close()
 
     return {
         "active_enrolment": enrolment_count,
         "on_hold": hold_count,
-        "pre_enroled": pre_enroled_count
+        "pre_enroled": pre_enroled_count,
+        "previous_month_enrolments": previous_month_enrolments
     }
 
 def get_education_level_stats():
