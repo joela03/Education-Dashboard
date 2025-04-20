@@ -233,13 +233,21 @@ def get_enrolment_stats():
 
     previous_month_enrolments = curs.fetchone()["count"]
 
+    curs.execute("""
+        SELECT AVG(attendance_count) as total_attendance
+        FROM student_education_stats
+    """)
+
+    avg_attendance = curs.fetchone()["total_attendance"]
+
     curs.close()
 
     return {
         "active_enrolment": enrolment_count,
         "on_hold": hold_count,
         "pre_enroled": pre_enroled_count,
-        "previous_month_enrolments": previous_month_enrolments
+        "previous_month_enrolments": previous_month_enrolments,
+        "avg_attendance": avg_attendance
     }
 
 def get_education_level_stats():
