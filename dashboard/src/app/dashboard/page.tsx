@@ -35,13 +35,17 @@ export default function Page() {
     attendance: false,
     progressCheck: false,
     planpace: false,
-    checkup: false
   })
 
-  const fetchAPIData = async <T,>(endpoint: string, setData: React.Dispatch<React.SetStateAction<T[]>>, loadingKey: keyof typeof loading) => {
+  const fetchAPIData = async <T,>(
+    endpoint: string,
+    setData: React.Dispatch<React.SetStateAction<T | T[]>>,
+    loadingKey: keyof typeof loading
+  ) => {
     setLoading(prev => ({...prev, [loadingKey]: true}));
     try {
       const response = await fetch(`http://localhost:5000/${endpoint}`);
+      if (!response.ok) throw new Error(`Failed to fetch ${endpoint} data`)
       const data = await response.json();
       setData(data);
     } catch (error) {
