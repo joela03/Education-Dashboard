@@ -31,6 +31,12 @@ type EnrolmentStatsData = {
   previous_month_enrolments: number;
 };
 
+type ExtendedStatsData = EnrolmentStatsData & {
+  needCheckup: number;
+  needProgressCheck: number;
+  poorAttendance: number;
+};
+
 interface CachedData<T> {
   data: T[];
   timestamp: number;
@@ -143,6 +149,29 @@ export default function Page() {
     }
   };
 
+  const getExtendedStats = (): ExtendedStatsData | undefined => {
+    if (!statsData.length) return undefined;
+    
+    return {
+      ...statsData[0],
+      needCheckup: checkupData.length,
+      needProgressCheck: progressCheckData.length,
+      poorAttendance: attendanceData.length
+    };
+  };
+
+  const preloadAllInterventionData = async () => {
+    try {
+      await Promise.all([
+        fetchAttendanceDataQuietly(),
+        fetchProgressCheckDataQuietly(),
+        fetchCheckupDataQuietly()
+      ]);
+    } catch (error) {
+      console.error("Error preloading intervention data:", error);
+    }
+  };
+
   const fetchAttendanceData = async (forceRefresh = false) => {
     return fetchWithCache<AttendanceData>(
       "attendance",
@@ -152,6 +181,30 @@ export default function Page() {
     );
   };
 
+  const fetchAttendanceDataQuietly = async () => {
+    const cacheKey = `mathnasium_cache_attendance`;
+    try {
+      const cachedItem = localStorage.getItem(cacheKey);
+      if (cachedItem) {
+        const { data } = JSON.parse(cachedItem) as CachedData<AttendanceData>;
+        setAttendanceData(data);
+        return data;
+      }
+      
+      const response = await fetch(`http://localhost:5000/attendance`);
+      if (!response.ok) return [];
+      
+      const data = await response.json();
+      if (!Array.isArray(data)) return [];
+      
+      setAttendanceData(data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching attendance data quietly:", error);
+      return [];
+    }
+  };
+
   const fetchProgressCheckData = async (forceRefresh = false) => {
     return fetchWithCache<ProgressCheckData>(
       "progress_check",
@@ -159,6 +212,30 @@ export default function Page() {
       'progressCheck',
       forceRefresh
     );
+  };
+
+  const fetchProgressCheckDataQuietly = async () => {
+    const cacheKey = `mathnasium_cache_progress_check`;
+    try {
+      const cachedItem = localStorage.getItem(cacheKey);
+      if (cachedItem) {
+        const { data } = JSON.parse(cachedItem) as CachedData<ProgressCheckData>;
+        setProgressCheckData(data);
+        return data;
+      }
+      
+      const response = await fetch(`http://localhost:5000/progress_check`);
+      if (!response.ok) return [];
+      
+      const data = await response.json();
+      if (!Array.isArray(data)) return [];
+      
+      setProgressCheckData(data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching progress check data quietly:", error);
+      return [];
+    }
   };
 
   const fetchPlanPaceData = async (forceRefresh = false) => {
@@ -177,6 +254,30 @@ export default function Page() {
       'checkup',
       forceRefresh
     );
+  };
+
+  const fetchCheckupDataQuietly = async () => {
+    const cacheKey = `mathnasium_cache_checkup`;
+    try {
+      const cachedItem = localStorage.getItem(cacheKey);
+      if (cachedItem) {
+        const { data } = JSON.parse(cachedItem) as CachedData<CheckupData>;
+        setCheckupData(data);
+        return data;
+      }
+      
+      const response = await fetch(`http://localhost:5000/checkup`);
+      if (!response.ok) return [];
+      
+      const data = await response.json();
+      if (!Array.isArray(data)) return [];
+      
+      setCheckupData(data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching checkup data quietly:", error);
+      return [];
+    }
   };
 
   const fetchStudentData = async (forceRefresh = false) => {
@@ -237,13 +338,15 @@ export default function Page() {
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      router.push("/dashboard");
+      router.push("/");
     } else {
       setIsAuthenticated(true);
       Promise.all([
         fetchStudentData(),
         fetchEnrolmentStats()
-      ]);
+      ]).then(() => {
+        preloadAllInterventionData();
+      });
     }
   }, [router]);
 
@@ -302,7 +405,7 @@ export default function Page() {
               {loading.stats ? (
                 <p>Loading stats data...</p>
               ) : statsData.length > 0 ? (
-                <SectionCards stats={statsData[0]} />
+                <SectionCards stats={getExtendedStats()} />
               ) : (
                 <p>No stats data available</p>
               )}
