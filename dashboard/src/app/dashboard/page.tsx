@@ -21,6 +21,54 @@ import { attendanceColumns, AttendanceData, progressCheckColumns,
         ProgressCheckData,planPaceColumns, PlanPaceData,
         checkupColumns, CheckupData } from "@/configs/tableConfigs"
 
+type EnrolmentStatsData = {
+  active_enrolment: number;
+  avg_attendance: string;
+  on_hold: number;
+  pre_enroled: number;
+  previous_month_enrolments: number;
+};
+
+function isAttendanceData(data: any): data is AttendanceData {
+  return (
+    typeof data?.name === 'string' &&
+    typeof data?.mathnasium_id === 'string' &&
+    typeof data?.attendance_count === 'number'
+  );
+}
+
+function isProgressCheckData(data: any): data is ProgressCheckData {
+  return (
+    typeof data?.name === 'string' &&
+    typeof data?.mathnasium_id === 'string' &&
+    !isNaN(Number(data?.skills_mastered_percent)) 
+  );
+};
+
+function isPlanPaceData(data: any): data is PlanPaceData {
+  return (
+    typeof data?.name === 'string' &&
+    typeof data?.mathnasium_id === 'string' &&
+    typeof data?.expected_plan_percentage === 'string'
+  );
+}
+
+function isCheckupData(data: any): data is CheckupData {
+  return (
+    typeof data?.name === 'string' &&
+    typeof data?.mathnasium_id === 'string' &&
+    data?.last_assessment instanceof Date
+  );
+}
+
+function isEnrolmentStatsData(data: any): data is EnrolmentStatsData {
+  return (
+    typeof data?.active_enrolment === 'number' &&
+    typeof data?.avg_attendance === 'string' &&
+    typeof data?.on_hold === 'number'
+  );
+}
+
 export default function Page() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const router = useRouter()
@@ -30,43 +78,80 @@ export default function Page() {
   const [CheckupData, setCheckupData] = useState<CheckupData[]>([])
   const [progressCheckData, setProgressCheckData] = useState<ProgressCheckData[]>([])
   const [studentData, setStudentData] = useState<any[]>([])
+  const [statsData, setEnrolmentStatsData] = useState<EnrolmentStatsData[]>([])
   const [loading, setLoading] = useState({
     general: false,
     attendance: false,
     progressCheck: false,
     planpace: false,
+    checkup: false,
+    stats: false
   })
 
-  const fetchAPIData = async <T,>(
+  const fetchArrayData = async <T,>(
     endpoint: string,
-    setData: React.Dispatch<React.SetStateAction<T | T[]>>,
-    loadingKey: keyof typeof loading
+    setData: React.Dispatch<React.SetStateAction<T[]>>,
   ) => {
-    setLoading(prev => ({...prev, [loadingKey]: true}));
+    setLoading(prev => ({...prev}));
     try {
       const response = await fetch(`http://localhost:5000/${endpoint}`);
-      if (!response.ok) throw new Error(`Failed to fetch ${endpoint} data`)
+      if (!response.ok) throw new Error(`Failed to fetch ${endpoint} data`);
       const data = await response.json();
-      setData(data);
+      console.log(data);
+      
+      if (!Array.isArray(data)) {
+        throw new Error(`Expected array from ${endpoint}, got ${typeof data}`);
+      }
+
+      setData(data as T[]);
     } catch (error) {
       console.error(`Error fetching ${endpoint} data:`, error);
+      setData([]);
     } finally {
-      setLoading(prev => ({...prev, [loadingKey]: false}));
+      setLoading(prev => ({...prev}));
     }
   };
 
-  const fetchStudentProgressData = async () => {
-    setLoading(prev => ({...prev, general: true}));
-    try {
-      const response = await fetch('http://localhost:5000/education_stats');
-      if (!response.ok) throw new Error('Failed to fetch student data');
-      const data = await response.json();
-      setStudentData(data);
-    } catch (error) {
-      console.error('Error fetching student data:', error);
-    } finally {
-      setLoading(prev => ({...prev, general: false}));
-    }
+  const fetchAttendanceData = async () => {
+    return fetchArrayData<AttendanceData>(
+      "attendance",
+      setAttendanceData
+    );
+  };
+
+  const fetchProgressCheckData = async () => {
+    return fetchArrayData<ProgressCheckData>(
+      "progress_check",
+      setProgressCheckData
+    );
+  };
+
+  const fetchPlanPaceData = async () => {
+    return fetchArrayData<PlanPaceData>(
+      "planpace",
+      setPlanPaceData
+    );
+  };
+
+  const fetchCheckupData = async () => {
+    return fetchArrayData<CheckupData>(
+      "checkup",
+      setCheckupData
+    );
+  };
+
+  const fetchStudentData = async () => {
+    return fetchArrayData<any>(
+      "education_stats",
+      setStudentData
+    );
+  };
+
+  const fetchEnrolmentStats = async () => {
+    return fetchArrayData<EnrolmentStatsData>(
+      "enrolment_stats",
+      setEnrolmentStatsData
+    );
   };
 
   useEffect(() => {
@@ -74,23 +159,27 @@ export default function Page() {
     if (!token) {
       router.push("/dashboard");
     } else {
-      setIsAuthenticated(true)
-      fetchStudentProgressData();
+      setIsAuthenticated(true);
+      Promise.all([
+        fetchStudentData(),
+        fetchEnrolmentStats()
+      ]);
     }
   }, [router]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
 
+    const endpointHandlers: Record<string, () => Promise<void>> = {
+      "attendance": fetchAttendanceData,
+      "progress_check": fetchProgressCheckData,
+      "planpace": fetchPlanPaceData,
+      "checkup": fetchCheckupData
+    };
+
     const lastSegment = selectedPage.split("/").pop();
-    if (lastSegment === "attendance") {
-      fetchAPIData(lastSegment, setAttendanceData, 'attendance');
-    } else if (lastSegment === "progress_check") {
-      fetchAPIData(lastSegment, setProgressCheckData, 'progressCheck');
-    } else if (lastSegment === "planpace") {
-      fetchAPIData(lastSegment, setPlanPaceData, 'planpace');
-    } else if (lastSegment === "checkup") {
-      fetchAPIData(lastSegment, setCheckupData, 'checkup');
+    if (lastSegment && endpointHandlers[lastSegment]) {
+      endpointHandlers[lastSegment]();
     }
   }, [selectedPage, isAuthenticated]);
 
@@ -118,7 +207,13 @@ export default function Page() {
         <div className="flex flex-1 flex-col gap-4 p-4">
           {selectedPage === "/dashboard/general" ? (
             <div className="space-y-6">
-              <SectionCards />
+              {loading.stats ? (
+                <p>Loading stats data...</p>
+              ) : statsData.length > 0 ? (
+                <SectionCards stats={statsData[0]} />
+              ) : (
+                <p>No stats data available</p>
+              )}
               <div className="bg-white p-6 rounded-lg shadow">
                 <h2 className="text-2xl font-bold mb-6">Student Progress Overview</h2>
                 {loading.general ? (
