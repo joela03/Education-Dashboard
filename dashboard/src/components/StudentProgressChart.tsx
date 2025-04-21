@@ -77,40 +77,53 @@ export function StudentProgressChart({ data }: { data: any[] }) {
   };
 
   return (
-    <Card>
+    <Card className="relative">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <CardTitle className="text-sm font-medium">Student Progress</CardTitle>
-        <Select value={timeFilter} onValueChange={setTimeFilter}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by enrolment" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Students</SelectItem>
-            <SelectItem value="6months">6+ Months</SelectItem>
-            <SelectItem value="1year">1+ Years</SelectItem>
-            <SelectItem value="1.5years">1.5+ Years</SelectItem>
-            <SelectItem value="2years">2+ Years</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="relative z-50">
+          <Select value={timeFilter} onValueChange={setTimeFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by enrolment" />
+            </SelectTrigger>
+            <SelectContent className="z-[1000]">
+              <SelectItem value="all">All Students</SelectItem>
+              <SelectItem value="6months">6+ Months</SelectItem>
+              <SelectItem value="1year">1+ Years</SelectItem>
+              <SelectItem value="1.5years">1.5+ Years</SelectItem>
+              <SelectItem value="2years">2+ Years</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
-      <CardContent>
+      
+      <CardContent className="relative z-0">
         <ChartContainer config={chartConfig} className="h-[400px]">
-          <BarChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip 
-              content={<ChartTooltipContent />} 
-              formatter={(value) => [`${value} students`, ""]}
-            />
-            <Legend content={<ChartLegendContent />} />
-            <Bar 
-              dataKey="value" 
-              name="Students"
-              fill="var(--color)"
-              radius={[4, 4, 0, 0]}
-            />
-          </BarChart>
+          <ResponsiveContainer>
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip 
+                content={<ChartTooltipContent />}
+                formatter={(value) => [`${value} students`, ""]}
+                wrapperStyle={{
+                  backgroundColor: 'white',
+                  boxShadow: '0 0 10px rgba(0,0,0,0.1)',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  padding: '8px'
+                }}
+                cursor={{ fill: 'rgba(0,0,0,0.1)' }}
+              />
+              <Legend content={<ChartLegendContent />} />
+              <Bar 
+                dataKey="value" 
+                name="Students"
+                fill="var(--color)"
+                radius={[4, 4, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
         </ChartContainer>
       </CardContent>
     </Card>
