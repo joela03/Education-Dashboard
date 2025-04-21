@@ -1,10 +1,10 @@
 "Main scripts that webscrapes"
 
-import time
 import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 from functions import (get_credentials_from_env, enter_credentials_to_website,
                        select_reports, scrape_table,convert_col_to_dt,
                        click, interact_with_k_dropdown, merge_df,
@@ -16,7 +16,13 @@ from imports import (get_db_connection, import_students_to_database, insert_into
                     insert_into_enrolments_db, insert_into_holds_db, insert_preenroled_into_students)
 
 if __name__ == "__main__":
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
 
     try:
         credential_list = get_credentials_from_env()
