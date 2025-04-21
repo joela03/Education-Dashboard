@@ -242,13 +242,13 @@ def get_enrolment_stats():
 
     curs.close()
 
-    return {
+    return [{
         "active_enrolment": enrolment_count,
         "on_hold": hold_count,
         "pre_enroled": pre_enroled_count,
         "previous_month_enrolments": previous_month_enrolments,
         "avg_attendance": avg_attendance
-    }
+    }]
 
 def get_education_level_stats():
     """Pulls stats on education"""
