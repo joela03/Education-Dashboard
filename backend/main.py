@@ -15,14 +15,17 @@ from functions import (get_credentials_from_env, enter_credentials_to_website,
 from imports import (get_db_connection, import_students_to_database, insert_into_assessments_db,
                     insert_into_enrolments_db, insert_into_holds_db, insert_preenroled_into_students)
 
-if __name__ == "__main__":
+def setup_browser():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+if __name__ == "__main__":
+    driver = setup_browser()
 
     try:
         credential_list = get_credentials_from_env()
