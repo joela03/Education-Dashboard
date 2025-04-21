@@ -17,8 +17,10 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
 } from "@/components/ui/breadcrumb"
+import { Button } from "@/components/ui/button"
+import { RefreshCw } from "lucide-react"
 import { attendanceColumns, AttendanceData, progressCheckColumns,
-        ProgressCheckData,planPaceColumns, PlanPaceData,
+        ProgressCheckData, planPaceColumns, PlanPaceData,
         checkupColumns, CheckupData } from "@/configs/tableConfigs"
 
 type EnrolmentStatsData = {
@@ -29,44 +31,9 @@ type EnrolmentStatsData = {
   previous_month_enrolments: number;
 };
 
-function isAttendanceData(data: any): data is AttendanceData {
-  return (
-    typeof data?.name === 'string' &&
-    typeof data?.mathnasium_id === 'string' &&
-    typeof data?.attendance_count === 'number'
-  );
-}
-
-function isProgressCheckData(data: any): data is ProgressCheckData {
-  return (
-    typeof data?.name === 'string' &&
-    typeof data?.mathnasium_id === 'string' &&
-    !isNaN(Number(data?.skills_mastered_percent)) 
-  );
-};
-
-function isPlanPaceData(data: any): data is PlanPaceData {
-  return (
-    typeof data?.name === 'string' &&
-    typeof data?.mathnasium_id === 'string' &&
-    typeof data?.expected_plan_percentage === 'string'
-  );
-}
-
-function isCheckupData(data: any): data is CheckupData {
-  return (
-    typeof data?.name === 'string' &&
-    typeof data?.mathnasium_id === 'string' &&
-    data?.last_assessment instanceof Date
-  );
-}
-
-function isEnrolmentStatsData(data: any): data is EnrolmentStatsData {
-  return (
-    typeof data?.active_enrolment === 'number' &&
-    typeof data?.avg_attendance === 'string' &&
-    typeof data?.on_hold === 'number'
-  );
+interface CachedData<T> {
+  data: T[];
+  timestamp: number;
 }
 
 export default function Page() {
@@ -74,11 +41,12 @@ export default function Page() {
   const router = useRouter()
   const [selectedPage, setSelectedPage] = useState("/dashboard/general")
   const [attendanceData, setAttendanceData] = useState<AttendanceData[]>([])
-  const [PlanPaceData, setPlanPaceData] = useState<PlanPaceData[]>([])
-  const [CheckupData, setCheckupData] = useState<CheckupData[]>([])
+  const [planPaceData, setPlanPaceData] = useState<PlanPaceData[]>([])
+  const [checkupData, setCheckupData] = useState<CheckupData[]>([])
   const [progressCheckData, setProgressCheckData] = useState<ProgressCheckData[]>([])
   const [studentData, setStudentData] = useState<any[]>([])
-  const [statsData, setEnrolmentStatsData] = useState<EnrolmentStatsData[]>([])
+  const [statsData, setStatsData] = useState<EnrolmentStatsData[]>([])
+  const [refreshing, setRefreshing] = useState(false)
   const [loading, setLoading] = useState({
     general: false,
     attendance: false,
@@ -88,70 +56,182 @@ export default function Page() {
     stats: false
   })
 
-  const fetchArrayData = async <T,>(
+  const CACHE_CONFIG = {
+    DURATION: 24 * 60 * 60 * 1000,
+    ENDPOINTS: {
+      "education_stats": { duration: 12 * 60 * 60 * 1000 }, 
+      "enrolment_stats": { duration: 6 * 60 * 60 * 1000 }, 
+      "attendance": { duration: 24 * 60 * 60 * 1000 },
+      "progress_check": { duration: 24 * 60 * 60 * 1000 },
+      "planpace": { duration: 24 * 60 * 60 * 1000 },
+      "checkup": { duration: 24 * 60 * 60 * 1000 }
+    }
+  };
+
+  const fetchWithCache = async <T,>(
     endpoint: string,
     setData: React.Dispatch<React.SetStateAction<T[]>>,
+    loadingKey: keyof typeof loading,
+    forceRefresh = false
   ) => {
-    setLoading(prev => ({...prev}));
+    const cacheKey = `mathnasium_cache_${endpoint}`;
+    const now = Date.now();
+    
+    const cacheDuration = CACHE_CONFIG.ENDPOINTS[endpoint as keyof typeof CACHE_CONFIG.ENDPOINTS]?.duration || CACHE_CONFIG.DURATION;
+    
+    if (!forceRefresh) {
+      try {
+        const cachedItem = localStorage.getItem(cacheKey);
+        if (cachedItem) {
+          const { data, timestamp } = JSON.parse(cachedItem) as CachedData<T>;
+          if (now - timestamp < cacheDuration) {
+            console.log(`Using cached data for ${endpoint} (age: ${Math.round((now - timestamp) / 60000)} minutes)`);
+            setData(data);
+            return;
+          } else {
+            console.log(`Cache expired for ${endpoint}`);
+          }
+        }
+      } catch (error) {
+        console.error(`Error reading cache for ${endpoint}:`, error);
+      }
+    }
+
+    setLoading(prev => ({...prev, [loadingKey]: true}));
+    
     try {
       const response = await fetch(`http://localhost:5000/${endpoint}`);
-      if (!response.ok) throw new Error(`Failed to fetch ${endpoint} data`);
+      
+      if (!response.ok) {
+        throw new Error(`API returned ${response.status} for ${endpoint}`);
+      }
+      
       const data = await response.json();
-      console.log(data);
       
       if (!Array.isArray(data)) {
         throw new Error(`Expected array from ${endpoint}, got ${typeof data}`);
       }
-
+      
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({
+          data,
+          timestamp: now
+        }));
+      } catch (cacheError) {
+        console.warn(`Failed to cache ${endpoint} data:`, cacheError);
+      }
+      
       setData(data as T[]);
+      console.log(`Fetched fresh data for ${endpoint}`);
+      
     } catch (error) {
-      console.error(`Error fetching ${endpoint} data:`, error);
-      setData([]);
+      console.error(`Error fetching ${endpoint}:`, error);
+      
+      try {
+        const cachedItem = localStorage.getItem(cacheKey);
+        if (cachedItem) {
+          const { data } = JSON.parse(cachedItem) as CachedData<T>;
+          setData(data);
+          console.log(`Using stale cache for ${endpoint} as fallback`);
+        }
+      } catch (fallbackError) {
+        console.error(`Failed to use fallback cache for ${endpoint}:`, fallbackError);
+        setData([] as unknown as T[]);
+      }
     } finally {
-      setLoading(prev => ({...prev}));
+      setLoading(prev => ({...prev, [loadingKey]: false}));
     }
   };
 
-  const fetchAttendanceData = async () => {
-    return fetchArrayData<AttendanceData>(
+  const fetchAttendanceData = async (forceRefresh = false) => {
+    return fetchWithCache<AttendanceData>(
       "attendance",
-      setAttendanceData
+      setAttendanceData,
+      'attendance',
+      forceRefresh
     );
   };
 
-  const fetchProgressCheckData = async () => {
-    return fetchArrayData<ProgressCheckData>(
+  const fetchProgressCheckData = async (forceRefresh = false) => {
+    return fetchWithCache<ProgressCheckData>(
       "progress_check",
-      setProgressCheckData
+      setProgressCheckData,
+      'progressCheck',
+      forceRefresh
     );
   };
 
-  const fetchPlanPaceData = async () => {
-    return fetchArrayData<PlanPaceData>(
+  const fetchPlanPaceData = async (forceRefresh = false) => {
+    return fetchWithCache<PlanPaceData>(
       "planpace",
-      setPlanPaceData
+      setPlanPaceData,
+      'planpace',
+      forceRefresh
     );
   };
 
-  const fetchCheckupData = async () => {
-    return fetchArrayData<CheckupData>(
+  const fetchCheckupData = async (forceRefresh = false) => {
+    return fetchWithCache<CheckupData>(
       "checkup",
-      setCheckupData
+      setCheckupData,
+      'checkup',
+      forceRefresh
     );
   };
 
-  const fetchStudentData = async () => {
-    return fetchArrayData<any>(
+  const fetchStudentData = async (forceRefresh = false) => {
+    return fetchWithCache<any>(
       "education_stats",
-      setStudentData
+      setStudentData,
+      'general',
+      forceRefresh
     );
   };
 
-  const fetchEnrolmentStats = async () => {
-    return fetchArrayData<EnrolmentStatsData>(
+  const fetchEnrolmentStats = async (forceRefresh = false) => {
+    return fetchWithCache<EnrolmentStatsData>(
       "enrolment_stats",
-      setEnrolmentStatsData
+      setStatsData,
+      'stats',
+      forceRefresh
     );
+  };
+
+  const refreshCurrentData = async () => {
+    setRefreshing(true);
+    
+    try {
+      await Promise.all([
+        fetchStudentData(true),
+        fetchEnrolmentStats(true)
+      ]);
+      
+
+      const lastSegment = selectedPage.split("/").pop();
+      switch (lastSegment) {
+        case "attendance":
+          await fetchAttendanceData(true);
+          break;
+        case "progress_check":
+          await fetchProgressCheckData(true);
+          break;
+        case "planpace":
+          await fetchPlanPaceData(true);
+          break;
+        case "checkup":
+          await fetchCheckupData(true);
+          break;
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const clearAllCache = () => {
+    Object.keys(CACHE_CONFIG.ENDPOINTS).forEach(endpoint => {
+      localStorage.removeItem(`mathnasium_cache_${endpoint}`);
+    });
+    console.log("All cache cleared");
   };
 
   useEffect(() => {
@@ -171,10 +251,10 @@ export default function Page() {
     if (!isAuthenticated) return;
 
     const endpointHandlers: Record<string, () => Promise<void>> = {
-      "attendance": fetchAttendanceData,
-      "progress_check": fetchProgressCheckData,
-      "planpace": fetchPlanPaceData,
-      "checkup": fetchCheckupData
+      "attendance": () => fetchAttendanceData(),
+      "progress_check": () => fetchProgressCheckData(),
+      "planpace": () => fetchPlanPaceData(),
+      "checkup": () => fetchCheckupData()
     };
 
     const lastSegment = selectedPage.split("/").pop();
@@ -203,6 +283,18 @@ export default function Page() {
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
+          <div className="ml-auto">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={refreshCurrentData}
+              disabled={refreshing}
+              className="text-white border-white hover:bg-gray-800"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+              {refreshing ? 'Refreshing...' : 'Refresh Data'}
+            </Button>
+          </div>
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4">
           {selectedPage === "/dashboard/general" ? (
@@ -239,13 +331,13 @@ export default function Page() {
             loading.planpace ? (
               <p>Loading Plan Pace data...</p>
             ) : (
-              <DataTable columns={planPaceColumns} data={PlanPaceData} />
+              <DataTable columns={planPaceColumns} data={planPaceData} />
             )
           ) : selectedPage === "/dashboard/edu/checkup" ? (
             loading.checkup ? (
               <p>Loading Checkup data...</p>
             ) : (
-              <DataTable columns={checkupColumns} data={CheckupData} />
+              <DataTable columns={checkupColumns} data={checkupData} />
             )
           ) : (
             <div className="bg-muted/50 min-h-[100vh] flex-1 rounded-xl md:min-h-min">
