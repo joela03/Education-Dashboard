@@ -409,4 +409,24 @@ def get_hold_dates(holds: str) -> datetime:
         return (hold_start_date, hold_end_date)
     except (ValueError, IndexError, AttributeError):
         return (None, None)
+    
+def process_assessment_data(df, columns_to_drop=None):
+    """Cleans the df"""
+    clean_whitespace = lambda text: ' '.join(text.split())
+    df.columns = [clean_whitespace(col) for col in df.columns]
+    
+    if 'Student First Name' in df.columns and 'Student Last Name' in df.columns:
+        df['Student First Name'] = df.apply(lambda row: row['Student First Name'] + 
+                                           ' ' + row['Student Last Name'], axis=1)
         
+        # Rename columns
+        df.rename(columns={"Student First Name": "Student", 
+                          "Student First Name Link": "Student Link"}, inplace=True)
+    
+    # Drop specified columns if they exist
+    if columns_to_drop:
+        columns_to_drop = [col for col in columns_to_drop if col in df.columns]
+        if columns_to_drop:
+            df = df.drop(columns_to_drop, axis=1)
+    
+    return df
