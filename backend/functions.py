@@ -75,8 +75,6 @@ def select_reports(driver, enrolmentdropdownvalue):
     # Selects items per page to be 1000
     select_report_count(driver, "gridStudentReport", 3)
 
-    time.sleep(5)
-
 def select_assessment_report(driver):
     """Selects correct filters for the assessment report"""
 
