@@ -1,10 +1,17 @@
 """Function's that load pandas df to mathnasium database"""
 import os
 import hashlib
+import logging
 from dotenv import load_dotenv
 import psycopg2 
 import psycopg2.extras
 from functions import (safe_date, percentage_to_float, ensure_list, )
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger('mathnasium_db')
 
 def get_db_connection():
     """Sets up connection with database"""

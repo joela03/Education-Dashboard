@@ -436,6 +436,7 @@ def process_assessment_data(df, columns_to_drop=None):
     return df
 
 def setup_browser():
+    """Sets up browser"""
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
@@ -443,3 +444,14 @@ def setup_browser():
     chrome_options.add_argument("--disable-dev-shm-usage")
 
     return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+
+def wait_for_element(driver, locator, timeout=10):
+    """Wait for element to be clickable with dynamic timeout"""
+    try:
+        element = WebDriverWait(driver, timeout).until(
+            EC.element_to_be_clickable(locator)
+        )
+        return element
+    except TimeoutException:
+        print(f"Element {locator} not found within {timeout} seconds")
+        return None
