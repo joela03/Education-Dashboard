@@ -434,23 +434,37 @@ def process_assessment_data(df, columns_to_drop=None):
     return df
 
 def setup_browser():
-    """Sets up browser"""
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.add_argument('--headless')
-    chrome_options.add_argument('--no-sandbox')
-    chrome_options.add_argument('--disable-gpu')
-    chrome_options.add_argument('--window-size=1280x1696')
-    chrome_options.add_argument('--single-process')
-    chrome_options.add_argument('--disable-dev-shm-usage')
+    """Set up Chrome WebDriver for both local and Lambda environments"""
+    import os
+    from selenium import webdriver
+    from selenium.webdriver.chrome.options import Options
+    from selenium.webdriver.chrome.service import Service
     
-    # Path to Chrome binary in Lambda environment
-    chrome_options.binary_location = "/opt/chrome/chrome"
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--disable-gpu")
     
-    # Path to chromedriver in Lambda environment
-    return webdriver.Chrome(
-        executable_path="/opt/chromedriver",
-        chrome_options=chrome_options
-    )
+    # Only set binary location when in Lambda environment
+    if os.environ.get("AWS_EXECUTION_ENV"):
+        chrome_options.binary_location = "/opt/chrome/chrome"
+    
+    # Lambda-specific configuration
+    if os.environ.get("AWS_EXECUTION_ENV"):
+        driver = webdriver.Chrome(
+            options=chrome_options,
+            service=Service("/opt/chromedriver")
+        )
+    else:
+        # Local environment - use the system chromedriver
+        from webdriver_manager.chrome import ChromeDriverManager
+        driver = webdriver.Chrome(
+            options=chrome_options,
+            service=Service(ChromeDriverManager().install())
+        )
+    
+    return driver
 
 def wait_for_element(driver, locator, timeout=10):
     """Wait for element to be clickable with dynamic timeout"""
