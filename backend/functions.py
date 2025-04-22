@@ -435,13 +435,22 @@ def process_assessment_data(df, columns_to_drop=None):
 
 def setup_browser():
     """Sets up browser"""
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--disable-gpu")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("--disable-dev-shm-usage")
-
-    return webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=chrome_options)
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.add_argument('--headless')
+    chrome_options.add_argument('--no-sandbox')
+    chrome_options.add_argument('--disable-gpu')
+    chrome_options.add_argument('--window-size=1280x1696')
+    chrome_options.add_argument('--single-process')
+    chrome_options.add_argument('--disable-dev-shm-usage')
+    
+    # Path to Chrome binary in Lambda environment
+    chrome_options.binary_location = "/opt/chrome/chrome"
+    
+    # Path to chromedriver in Lambda environment
+    return webdriver.Chrome(
+        executable_path="/opt/chromedriver",
+        chrome_options=chrome_options
+    )
 
 def wait_for_element(driver, locator, timeout=10):
     """Wait for element to be clickable with dynamic timeout"""
